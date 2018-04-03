@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pocetna</title>
+<link rel="stylesheet" type="text/css" href="still.css">
+<script src="jquery-3.2.1.js"></script>
+<script> 
+/*$(".channeloptions h2").text(result);*/
+$(document).ready(function() {
+	
+		$('#upload').on('click', function(event) {
+			window.location.replace('Video.html');
+		});
+		$.get('ChannelServlet', function(data) {
+			console.log('channel odgovor');
+			console.log(data);
+			if (data.status == 'unauthenticated') {
+				$(".channeloptions").hide();
+				$("#logout12").hide();
+				$.get('UcitavanjeServlet', function(response) {
+					for(var i=0; i<response.size; i++) {
+						var newDiv = $('<div></div>');
+						newDiv.addClass('VideoContainer');
+
+						var video = response.video[i];
+						
+						newDiv.append('<img width="250" height="150" src=' + video.slikaURL +'>'+'</img>'+'<br>'+'<p>'+video.opis+'</p>'+'<h5>'+video.vlasnik+'</h5>'+'</br>'+'<h5>'+video.brojPregleda+' prikaza   *'+'</h5>'+'<h5>'+' '+video.datumKreiranja+'</h5>');
+
+						newDiv.data('video', video.videoURL);
+						newDiv.data('slika', video.slikaURL);
+						newDiv.data('opis', video.opis);
+						newDiv.data('vidljivost', video.vidljivost);
+						newDiv.data('dozvoljeniKom', video.dozvoljeniKomentari);
+						newDiv.data('vidljivostRejtinga', video.vidljivostRejtinga);
+						newDiv.data('blokiran', video.blokiran);
+						newDiv.data('brojPregleda', video.brojPregleda);
+						newDiv.data('datum', video.datumKreiranja);
+						newDiv.data('vlasnik', video.vlasnik);
+						newDiv.data('id', video.id);
+
+						$('.sadrzaj').append(newDiv);
+					}
+					$(document).on('click', '.VideoContainer', function(e) {
+						var video = $(this).data('video');
+						var slika = $(this).data('slika');
+						var opis = $(this).data('opis');
+						var vidljivost = $(this).data('vidljivost');
+						var dozKom = $(this).data('dozvoljeniKom');
+						var vidRejt = $(this).data('vidljivostRejtinga');
+						var blokiran = $(this).data('blokiran');
+						var brPregleda = $(this).data('brojPregleda');
+						var datum = $(this).data('datum');
+						var vlasnik = $(this).data('vlasnik');
+						var id = $(this).data('id');
+
+						$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
+							
+							window.location.replace('PrikazVidea.html');
+							
+						});
+				});
+			});
+			}
+			if (data.status == 'success') 
+			{
+				$(".channeloptions h2").text(data.user.korisnickoIme);
+				$(".channeloptions p").text(data.user.opis);
+				$("#login12").hide();
+				$("#registracija12").hide();
+				$.get('UcitavanjeServlet', function(response) {
+					for(var i=0; i<response.size; i++) {
+						var newDiv = $('<div></div>');
+						newDiv.addClass('VideoContainer');
+
+						var video = response.video[i];
+						
+						newDiv.append('<img width="250" height="150" src=' + video.slikaURL +'>'+'</img>'+'<br>'+'<p>'+video.opis+'</p>'+'<h5>'+video.vlasnik+'</h5>'+'</br>'+'<h5>'+video.brojPregleda+' prikaza   *'+'</h5>'+'<h5>'+' '+video.datumKreiranja+'</h5>');
+
+						newDiv.data('video', video.videoURL);
+						newDiv.data('slika', video.slikaURL);
+						newDiv.data('opis', video.opis);
+						newDiv.data('vidljivost', video.vidljivost);
+						newDiv.data('dozvoljeniKom', video.dozvoljeniKomentari);
+						newDiv.data('vidljivostRejtinga', video.vidljivostRejtinga);
+						newDiv.data('blokiran', video.blokiran);
+						newDiv.data('brojPregleda', video.brojPregleda);
+						newDiv.data('datum', video.datumKreiranja);
+						newDiv.data('vlasnik', video.vlasnik);
+						newDiv.data('id', video.id);
+
+						$('.sadrzaj').append(newDiv);
+					}
+					$(document).on('click', '.VideoContainer', function(e) {
+						var video = $(this).data('video');
+						var slika = $(this).data('slika');
+						var opis = $(this).data('opis');
+						var vidljivost = $(this).data('vidljivost');
+						var dozKom = $(this).data('dozvoljeniKom');
+						var vidRejt = $(this).data('vidljivostRejtinga');
+						var blokiran = $(this).data('blokiran');
+						var brPregleda = $(this).data('brojPregleda');
+						var datum = $(this).data('datum');
+						var vlasnik = $(this).data('vlasnik');
+						var id = $(this).data('id');
+
+						$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
+							
+							window.location.replace('PrikazVidea.html');
+							
+						});
+				});
+			});
+			}
+			console.log('poslat zahtev');
+		});
+	});
+</script>
+</head>
+<body>
+
+	<div class="menu_bg"></div> 
+    			<div id="menu">
+            		<ul>
+            			<li><img src="images/logo.jpg"></li>
+            			<li><a href="Channel.html">CHANNELS</a></li>
+            			<li><a id="login12" href="Login.html">LOGIN</a></li>
+            			<li><a id="logout12" href="LogoutServlet">LOGOUT</a></li>
+           				<li><a id="registracija12" href="Registracija.html">CREATE AN ACCOUNT</a></li>
+        			</ul>
+	                <input type="text" name="search_box" id="search_box" value="" />
+	                <input type="submit" name="search_button" id="search_button" value="" />
+	            </div>
+	           </div>
+	        <div class="channeloptions">
+	        	<h2></h2>
+	        	<center>
+	        	<img src="images/channelP.jpg" height="140px" width="140px">
+	        	</center><br>
+	        	<p>Informacije o kanalu...</p><br><br>
+	        	<center>
+	        	<input id="upload" type="image" src="images/upload.jpg" height="30px" width="30px">
+	        	</center>
+	        	<center>
+	        	Upload video
+	        	</center>
+	        </div>
+	        <div class='divP'></div>
+	        <div class='sadrzaj'></div>
+			<!--<div class="VideoContainer">
+				<iframe width="560" height="315" src=https://www.youtube.com/embed/A6j7mUxGz20 frameborder="0" allowfullscreen ></iframe>
+			</div>-->
+			<footer>
+		    	Copyright &copy; 2017. Jankovic Marko
+		    </footer>
+</body>
+</html>

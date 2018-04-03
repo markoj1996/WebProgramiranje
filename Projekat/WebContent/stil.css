@@ -1,0 +1,137 @@
+html{
+	height: 100%;
+}
+body {
+	margin: 0px;
+ 	padding: 0px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;	
+	background-color: #FFFFFF;
+	height: 100%;
+}
+
+.menu_bg {
+	 position: absolute;
+	 top: 0px;
+	 height: 39px;
+	 width: 100%;
+	 background-color: #000;
+	 border-bottom: 1px solid #333333;
+}
+
+
+#menu {
+ float:left;
+ width:100%;
+ background:#000;
+ border-bottom:1px solid #333333;
+ overflow:hidden;
+ position:relative;
+ height: 39px;
+}
+
+#menu ul {
+   list-style:none;
+   margin:0;
+   padding:0;
+   position:relative;
+   left:50%;
+   text-align:center;
+}
+
+#menu ul li {
+   display:block;
+   float:left;
+   list-style:none;
+   margin:0;
+   padding:0;
+   position:relative;
+   right:50%;
+}
+
+
+#menu ul li a {
+   display:block;
+   padding:12px 10px 3px;
+   background:#000;
+   color:#FFFFFF;
+   text-decoration:none;
+   height: 36px;
+   font-weight: bold;
+   border-right: 1px solid #333333;
+}
+
+#menu ul li img{
+	margin-left: 50px;
+	margin-right: 600px;
+}
+
+#search_box {
+ background-color: #333333;
+ color: #FFFFFF;
+ width: px;
+ border: 0px;
+ height: 20px;
+ float: left;
+ margin: 8px 0px 0px 5px;
+ outline: none;
+}
+
+#search_button {
+float: left;
+margin: 0px;
+padding: 0px;	
+ background-color: #333333;
+ width: 20px;
+ height: 22px;
+ border: 0px;
+  margin: 8px 0px;
+  background-image:url(images/search_mag.png);
+  background-repeat:no-repeat;
+  background-position:center;
+}
+
+
+h2 {
+ font-weight: 200;
+ border-bottom: 1px solid #0F9
+}
+
+footer {
+	text-align: right;
+	font-size: 12px;
+	border-top: 1px solid #fff;
+	border-bottom: none;
+	padding-top: 5px;
+}
+
+.channeloptions {
+	background-color: #F1F1F1;
+	width: 200px;
+	height: 100%;
+	border: 1px solid #CCCCCC;
+	float: left;
+}
+
+.channeloptions h2{
+	color: #333333;
+	text-decoration: none;
+	text-align: center;
+}
+
+.channeloption img{
+	margin: 0px auto 0px auto;
+}
+
+.sadrzaj VideoContainer{
+	height: 150px;
+	width:  250px;
+ 	margin: 50px 30px 30px 30px;
+}
+
+.sadrzaj VideoContainer img {
+
+	height: 150px;
+	width:  250px;
+ 	margin: 50px 30px 30px 30px;
+}

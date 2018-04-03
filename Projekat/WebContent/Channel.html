@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Channel</title>
+<script src="jquery-3.2.1.js"></script>
+<script>
+/*	$("#div h2").text('af');	*/
+$(document).ready(function() {
+	$('#provera').on('click', function(event) {
+	$.get('ChannelServlet', function(data) {
+		console.log('stigao odgovor');
+		console.log(data);
+		if (data.status == 'unauthenticated') {
+			window.location.replace('Channel.html');
+			return;
+		}
+		if (data.status == 'success') 
+		{
+			$("#div h2").text(data.user.korisnickoIme);
+		}
+		console.log('poslat zahtev');
+	});
+	});
+});
+</script>
+</head>
+<body>
+<div id='div'>
+	Korisnik: <h2></h2>
+	<input type="submit" value="Provera" id="provera">
+</div>
+</body>
+</html>

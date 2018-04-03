@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Video</title>
+<script src="jquery-3.2.1.js"></script>
+<script>
+$(document).ready(function() {
+	var videoInput = $('#videoInput');
+	var slicicaInput = $('#slicicaInput');
+	var opisInput = $('#opisInput');
+	
+	var messageParagraph = $('#messageParagraph');
+	
+	$.get('ChannelServlet', function(data) {
+		console.log('stigao odgovor');
+		console.log(data);
+		if (data.status == 'unauthenticated') {
+			window.location.replace('PocetnaStrana.html');
+		}
+		if (data.status == 'success') 
+		{
+			var user = data.user.korisnickoIme;
+			$('#dodajSubmit').on('click', function(event) { // izvršava se na klik na dugme
+				var video = videoInput.val();
+				var slicica = slicicaInput.val();
+				var opis = opisInput.val();
+				
+				console.log('video: ' + video);
+				console.log('slicica: ' + slicica);
+				console.log('opis: ' + opis);
+				console.log('user: ' + user);
+
+				$.post('VideoServlet', {'video': video, 'slicica': slicica,'opis': opis,'user':user}, function(data) { // u posebnoj programskoj niti se šalje (asinhroni) zahtev
+					// tek kada stigne odgovor izvršiće se ova anonimna funkcija
+					console.log('stigao odgovor');
+					console.log(data);
+
+					messageParagraph.text(data.message);
+					if (data.status == 'success') {
+						window.location.replace('PocetnaStrana.html');
+					}
+				});
+				// program se odmah nastavlja dalje, pre nego što stigne odgovor
+				console.log('poslat zahtev');
+
+				// zabraniti da browser obavi podrazumevanu akciju pri događaju
+				event.preventDefault();
+				return false;
+			});
+		}
+		console.log('poslat zahtev');
+	});
+	
+	
+	
+});
+</script>
+</head>
+<body>
+	<h3>Dodavanje videa:</h3>
+	<table>
+	
+		<tr><td align="right">Video:</td><td><input type="text" id="videoInput"/></td></tr>
+		<tr><td align="right">Slicica:</td><td><input type="text" id="slicicaInput"/></td></tr>
+		<tr><td align="right">Opis:</td><td><input type="text" id="opisInput"/></td></tr>
+		<tr><td/><td><input type="submit" value="Dodaj Video" id="dodajSubmit"></td></tr>
+	</table>
+	<p style="color: red;" id="messageParagraph"/>
+</body>
+</html>

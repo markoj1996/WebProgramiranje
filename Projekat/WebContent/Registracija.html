@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Registracija</title>
+<script src="jquery-3.2.1.js"></script>
+<script>
+	$(document).ready(function() {
+		var userNameInput = $('#userNameInput');
+		var passwordInput = $('#passwordInput');
+		var imeInput = $('#imeInput');
+		var prezimeInput = $('#PrezimeInput');
+		var eMailInput = $('#EmailInput');
+		
+		var messageParagraph = $('#messageParagraph');
+		
+		$('#registrationSubmit').on('click', function(event) { // izvršava se na klik na dugme
+			var userName = userNameInput.val();
+			var password = passwordInput.val();
+			var ime = imeInput.val();
+			var prezime = prezimeInput.val();
+			var eMail = eMailInput.val();
+			
+			console.log('userName: ' + userName);
+			console.log('password: ' + password);
+			console.log('ime: ' + ime);
+			console.log('prezime: ' + prezime);
+			console.log('email: ' + eMail);
+			
+			$.post('RegisterServlet', {'userName': userName, 'password': password,'ime': ime,'prezime': prezime,'email':eMail}, function(data) { // u posebnoj programskoj niti se šalje (asinhroni) zahtev
+				// tek kada stigne odgovor izvršiće se ova anonimna funkcija
+				console.log('stigao odgovor');
+				console.log(data);
+
+				messageParagraph.text(data.message);
+				if (data.status == 'success') {
+					window.location.replace('PocetnaStrana.html');
+				}
+			});
+			// program se odmah nastavlja dalje, pre nego što stigne odgovor
+			console.log('poslat zahtev');
+
+			// zabraniti da browser obavi podrazumevanu akciju pri događaju
+			event.preventDefault();
+			return false;
+		});
+		
+	});
+</script>
+</head>
+<body>
+	<h3>Registracija:</h3>
+	<table>
+		<tr><td align="right">Korisničko ime:</td><td><input type="text" id="userNameInput"/></td></tr>
+		<tr><td align="right">Lozinka:</td><td><input type="password" id="passwordInput"/></td></tr>
+		<tr><td align="right">Ime:</td><td><input type="text" id="imeInput"/></td></tr>
+		<tr><td align="right">Prezime:</td><td><input type="text" id="PrezimeInput"/></td></tr>
+		<tr><td align="right">E-mail:</td><td><input type="text" id="EmailInput"/></td></tr>
+		<tr><td/><td><input type="submit" value="Registracija" id="registrationSubmit"></td></tr>
+	</table>
+	<p style="color: red;" id="messageParagraph"/>
+</body>
+</html>

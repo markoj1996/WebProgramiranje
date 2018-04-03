@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+<script src="jquery-3.2.1.js"></script>
+<script> 
+$(document).ready(function() { // izvršava se nakon što se izgradi DOM stablo HTML dokumenta
+	// keširanje referenci da se ne bi ponavljale pretrage kroz DOM stablo
+	var userNameInput = $('#userNameInput');
+	var passwordInput = $('#passwordInput');
+
+	var messageParagraph = $('#messageParagraph');
+
+	$('#logInSubmit').on('click', function(event) { // izvršava se na klik na dugme
+		var userName = userNameInput.val();
+		var password = passwordInput.val();
+		console.log('userName: ' + userName);
+		console.log('password: ' + password);
+
+		// kontrola toka se račva na 2 grane
+		$.post('LoginServlet', {'userName': userName, 'password': password}, function(data) { // u posebnoj programskoj niti se šalje (asinhroni) zahtev
+			// tek kada stigne odgovor izvršiće se ova anonimna funkcija
+			console.log('stigao odgovor');
+			console.log(data);
+
+			messageParagraph.text(data.message);
+			if (data.status == 'success') {
+				window.location.replace('PocetnaStrana.html');
+			}
+		});
+		// program se odmah nastavlja dalje, pre nego što stigne odgovor
+		console.log('poslat zahtev');
+
+		// zabraniti da browser obavi podrazumevanu akciju pri događaju
+		event.preventDefault();
+		return false;
+	});
+});
+</script>
+</head>
+<body>
+	<h3>Prijava:</h3>
+	<table>
+		<tr><td align="right">Korisničko ime:</td><td><input type="text" id="userNameInput"/></td></tr>
+		<tr><td align="right">Lozinka:</td><td><input type="password" id="passwordInput"/></td></tr>
+		<tr><td/><td><input type="submit" value="Prijava" id="logInSubmit"></td></tr>
+	</table>
+	<div class="channeloptions">
+	        	<h2></h2>
+	<p style="color: red;" id="messageParagraph"/>
+</body>
+</html>

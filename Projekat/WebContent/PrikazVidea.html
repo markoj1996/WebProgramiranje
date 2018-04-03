@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Prikaz Videa</title>
+<link rel="stylesheet" type="text/css" href="still.css">
+<script src="jquery-3.2.1.js"></script>
+<script> 
+$(document).ready(function() {
+	$.get('KlikServlet', function(data) {
+		console.log('prikaz odgovor');
+		if (data.status == 'success') 
+		{
+			var newDiv = $('<div></div>');
+			newDiv.addClass('PrikazVidea');
+			
+			var newDiv2 = $('<div></div>');
+			newDiv2.addClass('OpisVidea');
+			
+			newDiv.append('<iframe width="700" height="450" src='+data.video.videoURL+' frameborder="0" allowfullscreen ></iframe>');
+			newDiv2.append('<h1>'+data.video.opis+'</h1>'+'<h4>'+data.video.vlasnik+'</h4>'+'<h3>'+data.video.brojPregleda+' Prikaza'+'</h3>')
+			
+			var newDivLike = $('<div></div>');
+			newDivLike.addClass('LikeDiv');
+			
+			var newDivDisLike = $('<div></div>');
+			newDivDisLike.addClass('LikeDiv');
+			
+			var brojDisLike=10;
+			newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="return DisLike(this)"/><p>'+data.brojDislike+'</p>');
+			newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="return Like(this)"/><p id="pLike">'+data.brojLike+'</p>');
+			
+			newDiv2.append(newDivLike);
+			newDiv2.append(newDivDisLike);
+			$('.sadrzaj').append(newDiv);
+			$('.sadrzaj').append(newDiv2);
+		}
+	});	
+});
+function DisLike(e) {
+	
+	if (e.getAttribute('src') == 'images/disliked.jpg') {
+		e.setAttribute('src', 'images/dislike.jpg')
+		
+	}
+	else {
+		e.setAttribute('src', 'images/disliked.jpg');
+		
+		var upvotes = document.getElementById("imgLike");
+		
+		if(upvotes.getAttribute('src') == 'images/liked.jpg') {
+			upvotes.setAttribute('src', 'images/like.jpg');
+		}
+		
+	}
+	
+	
+	return false;
+}
+
+function Like(e) {
+	
+	if (e.getAttribute('src') == 'images/liked.jpg') {
+		e.setAttribute('src', 'images/like.jpg')
+	}
+	else {
+		e.setAttribute('src', 'images/liked.jpg');
+		
+		var downvotes = document.getElementById("imgDisLike");
+		
+		if(downvotes.getAttribute('src') == 'images/disliked.jpg') {
+			downvotes.setAttribute('src', 'images/dislike.jpg');
+		}
+	}
+	
+	
+	return false;
+}
+</script>
+</head>
+<body>
+	<div class="menu_bg"></div> 
+    			<div id="menu">
+            		<ul>
+            			<li><img src="images/logo.jpg"></li>
+            			<li><a href="Channel.html">CHANNELS</a></li>
+            			<li><a id="login12" href="Login.html">LOGIN</a></li>
+            			<li><a id="logout12" href="LogoutServlet">LOGOUT</a></li>
+           				<li><a id="registracija12" href="Registracija.html">CREATE AN ACCOUNT</a></li>
+        			</ul>
+	                <input type="text" name="search_box" id="search_box" value="" />
+	                <input type="submit" name="search_button" id="search_button" value="" />
+	            </div>
+	           </div>
+	        <div class="channeloptions">
+	        	<h2></h2>
+	        	<center>
+	        	<img src="images/channelP.jpg" height="140px" width="140px">
+	        	</center><br>
+	        	<p>Informacije o kanalu...</p><br><br>
+	        	<center>
+	        	<input id="upload" type="image" src="images/upload.jpg" height="30px" width="30px">
+	        	</center>
+	        	<center>
+	        	Upload video
+	        	</center>
+	        </div>
+	        <div class='sadrzaj'></div>
+</body>
+</html>
