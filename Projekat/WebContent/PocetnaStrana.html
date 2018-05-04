@@ -34,7 +34,7 @@ $(document).ready(function() {
 						newDiv.data('dozvoljeniKom', video.dozvoljeniKomentari);
 						newDiv.data('vidljivostRejtinga', video.vidljivostRejtinga);
 						newDiv.data('blokiran', video.blokiran);
-						newDiv.data('brojPregleda', video.brojPregleda);
+						newDiv.data('brojPregleda', video.brojPregleda+1);
 						newDiv.data('datum', video.datumKreiranja);
 						newDiv.data('vlasnik', video.vlasnik);
 						newDiv.data('id', video.id);
@@ -122,14 +122,24 @@ $(document).ready(function() {
 	<div class="menu_bg"></div> 
     			<div id="menu">
             		<ul>
-            			<li><img src="images/logo.jpg"></li>
-            			<li><a href="Channel.html">CHANNELS</a></li>
-            			<li><a id="login12" href="Login.html">LOGIN</a></li>
-            			<li><a id="logout12" href="LogoutServlet">LOGOUT</a></li>
-           				<li><a id="registracija12" href="Registracija.html">CREATE AN ACCOUNT</a></li>
+            			<li><div id="slika">
+            				<img src="images/logo.jpg">
+            			</div></li>
+            			<li><div id="pretraga">
+            				<input type="text" name="search_box" id="search_box" value="" />
+	                		<input type="submit" name="search_button" id="search_button" value="" />
+            			</div></li>
+            			<li><div id="uploaddiv">
+            				<input id="upload" type="image" src="images/upload.jpg">
+            			</div></li>
+            			<li><div id="dugmici">
+            			<ul>
+            				<li><a id="login12" href="Login.html">LOGIN</a></li>
+            				<li><a id="logout12" href="LogoutServlet">LOGOUT</a></li>
+            				<li><a id="channel12" href="Channel.html">CHANNELS</a></li>
+            				<li><a id="registracija12" href="Registracija.html">SIGN UP</a></li>
+           				</ul>
         			</ul>
-	                <input type="text" name="search_box" id="search_box" value="" />
-	                <input type="submit" name="search_button" id="search_button" value="" />
 	            </div>
 	           </div>
 	        <div class="channeloptions">

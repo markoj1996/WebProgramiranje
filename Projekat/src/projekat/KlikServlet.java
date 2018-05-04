@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import projekat.dao.LikeDislikeDAO;
+import projekat.dao.VideoDAO;
 import projekat.model.Korisnik;
 import projekat.model.LikeDislike;
 import projekat.model.Video;
@@ -58,6 +59,36 @@ public class KlikServlet extends HttpServlet {
 			}
 		}
 		
+		Korisnik loggedInUser = (Korisnik) session.getAttribute("user");
+		
+		if (loggedInUser == null) {
+			Map<String, Object> data = new HashMap<>();
+			data.put("user", "unauthenticated");
+			data.put("status", "success");
+			data.put("video", video);
+			data.put("slika", slika);
+			data.put("opis", opis);
+			data.put("vidljivost", vidljivost);
+			data.put("dozKom", dozKom);
+			data.put("vidRejt", vidRejt);
+			data.put("blokiran", blokiran);
+			data.put("brPregleda", brPregleda);
+			data.put("datum", datum);
+			data.put("vlasnik", vlasnik);
+			data.put("id", id);
+			data.put("brojLike", brojLike);
+			data.put("brojDislike", brojDislike);
+
+			ObjectMapper mapper = new ObjectMapper();
+			String jsonData = mapper.writeValueAsString(data);
+			System.out.println(jsonData);
+
+			response.setContentType("application/json");
+			response.getWriter().write(jsonData);
+//			response.sendRedirect("./Login.html");
+			return;
+		}
+		
 		Map<String, Object> data = new HashMap<>();
 		data.put("status", "success");
 		data.put("video", video);
@@ -73,6 +104,7 @@ public class KlikServlet extends HttpServlet {
 		data.put("id", id);
 		data.put("brojLike", brojLike);
 		data.put("brojDislike", brojDislike);
+		data.put("user", loggedInUser);
 
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonData = mapper.writeValueAsString(data);
@@ -97,6 +129,8 @@ public class KlikServlet extends HttpServlet {
 		int id = Integer.parseInt(request.getParameter("id"));
 
 		Video video2 = new Video(id, video, slika, opis, vidljivost, dozKom	, vidRejt, blokiran, brPregleda, datum, vlasnik);
+		
+		VideoDAO.update(video2);
 		
 		String message = "Uspesna prijava!";
 //		String link = "<a href=\"WebShopServlet\">Nastavak</a>";

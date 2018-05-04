@@ -15,6 +15,14 @@ public class LikeDislike {
 	private int video;
 	private Komentar komentar;
 	
+	public LikeDislike( int like, String datumKreiranja, int video) {
+		super();
+		this.like = like;
+		this.datumKreiranja = datumKreiranja;
+		this.video = video;
+	}
+	
+	
 	public LikeDislike(int iD, int like, String datumKreiranja, int video) {
 		super();
 		ID = iD;

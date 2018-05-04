@@ -106,5 +106,34 @@ public static ArrayList<LikeDislike> getAll() {
 
 		
 	}
+
+public static boolean add(LikeDislike like) {
+	Connection conn = ConnManager.getConnection();
+
+	PreparedStatement pstmt = null;
+	try {
+		
+		String query = "INSERT INTO LIKEDISLIKE (likee,datumKreiranja,video) VALUES (?, ?, ?)";
+
+		
+		pstmt = conn.prepareStatement(query);
+		int index = 1;
+		pstmt.setInt(index++, like.getLike());
+		pstmt.setString(index++, like.getDatumKreiranja());
+		pstmt.setInt(index++, like.getVideo());
+		
+		System.out.println(pstmt);
+		// izvrsavanje naredbe i prihvatanje rezultata (INSERT, UPDATE, DELETE), jednom za svaki SQL upit
+		return pstmt.executeUpdate() == 1;
+	} catch (SQLException ex) {
+		System.out.println("Greska u SQL upitu!");
+		ex.printStackTrace();
+	} finally {
+		// zatvaranje naredbe i rezultata
+		try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+	}
+
+	return false;
+}
 	
 }

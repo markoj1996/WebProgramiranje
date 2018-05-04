@@ -77,4 +77,14 @@
     <servlet-name>KlikServlet</servlet-name>
     <url-pattern>/KlikServlet</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>LikeServlet</display-name>
+    <servlet-name>LikeServlet</servlet-name>
+    <servlet-class>projekat.LikeServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LikeServlet</servlet-name>
+    <url-pattern>/LikeServlet</url-pattern>
+  </servlet-mapping>
 </web-app>

@@ -165,4 +165,41 @@ public class VideoDAO {
 		return false;
 	}
 	
+	public static boolean update(Video video) {
+		Connection conn = ConnManager.getConnection();
+
+		PreparedStatement pstmt = null;
+		try {
+			
+			String query = "Update Video set video=?,slicica=?,opis=?,vidljivost=?,dozvoljeniKomentari=?,vidljivostRejtinga=?,blokiran=?,brojPregleda=?,datumKreiranja=?,vlasnik=? where id=?";
+
+			
+			pstmt = conn.prepareStatement(query);
+			int index = 1;
+			pstmt.setString(index++, video.getVideoURL());
+			pstmt.setString(index++, video.getSlikaURL());
+			pstmt.setString(index++, video.getOpis());
+			pstmt.setString(index++, video.getVidljivost());
+			pstmt.setInt(index++, video.getDozvoljeniKomentari());
+			pstmt.setInt(index++, video.getVidljivostRejtinga());
+			pstmt.setInt(index++, video.getBlokiran());
+			pstmt.setInt(index++, video.getBrojPregleda());
+			pstmt.setString(index++, video.getDatumKreiranja().toString());
+			pstmt.setString(index++, video.getVlasnik());
+			pstmt.setInt(index++, video.getID());
+			
+			System.out.println(pstmt);
+			// izvrsavanje naredbe i prihvatanje rezultata (INSERT, UPDATE, DELETE), jednom za svaki SQL upit
+			return pstmt.executeUpdate() == 1;
+		} catch (SQLException ex) {
+			System.out.println("Greska u SQL upitu!");
+			ex.printStackTrace();
+		} finally {
+			// zatvaranje naredbe i rezultata
+			try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+		}
+
+		return false;
+	}
+	
 }
