@@ -43,7 +43,7 @@ public class VideoServlet extends HttpServlet {
 		
 		String vidljivost = "Javni";
 		int dozvoljeniKomentari=1;
-		int vidljivostRejtinga=0;
+		int vidljivostRejtinga=1;
 		int blokiran=0;
 		int brojPregleda=0;
 		Date dt = new Date();

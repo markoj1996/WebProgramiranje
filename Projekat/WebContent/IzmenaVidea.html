@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Izmena video snimka</title>
+<link rel="stylesheet" type="text/css" href="still.css">
+<script src="jquery-3.2.1.js"></script>
+<script>
+$(document).ready(function() {
+	$.get('IzmenaVideaServlet', function(data) {
+		var video = data.video;
+		var videoInput = $('#videoInput');
+		var slicicaInput = $('#slicicaInput');
+		var opisInput = $('#opisInput');
+		videoInput.val(video.videoURL);
+		slicicaInput.val(video.slikaURL);
+		opisInput.val(video.opis);
+		if(video.vidljivost==="Javni")
+		{
+			$("#v1").prop("checked", true); 
+		}else
+		{
+			$("#v2").prop("checked", true); 
+		}
+		
+		if(video.dozvoljeniKomentari==1)
+		{
+			$("#k1").prop("checked", true); 
+		}else
+		{
+			$("#k2").prop("checked", true); 
+		}
+		
+		if(video.vidljivostRejtinga==1)
+		{
+			$("#r1").prop("checked", true); 
+		}else
+		{
+			$("#r2").prop("checked", true); 
+		}
+		
+		$('#izmeniSubmit').on('click', function(event) { 
+			var video = videoInput.val();
+			var slicica = slicicaInput.val();
+			var opis = opisInput.val();
+			var x = document.getElementById("v1").checked;
+			var y = document.getElementById("k1").checked;
+			var z = document.getElementById("r1").checked;
+			var vidljivost;
+			var komentari;
+			var rejting;
+			if(x==true)
+			{
+				vidljivost=1;
+			}else if(x==false){
+				vidljivost=0;
+			}
+			if(y==true)
+			{
+				komentari=1;
+			}else if(y==false){
+				komentari=0;
+			}
+			if(z==true)
+			{
+				rejting=1;
+			}else if(z==false){
+				rejting=0;
+			}
+			$.post('IzmenaVideaServlet', {'video': video, 'slicica': slicica,'opis': opis,'vidljivost': vidljivost, 'komentari':komentari, 'rejting':rejting}, function(data) { 
+					window.location.replace('PocetnaStrana.html');
+			});
+			console.log('poslat zahtev');
+
+			event.preventDefault();
+			return false;
+		});
+	});
+});
+</script>
+</head>
+<body>
+	<h3>Izmena videa:</h3>
+	<table>
+		<tr><td align="right">Video:</td><td><input type="text" id="videoInput"/></td></tr>
+		<tr><td align="right">Slicica:</td><td><input type="text" id="slicicaInput"/></td></tr>
+		<tr><td align="right">Opis:</td><td><input type="text" id="opisInput"/></td></tr>
+		<tr><td align="right">Vidljivost:</td><td><form id="vidljivost">
+  			<input type="radio" name="gender" id="v1" value="javni" checked> Javni<br>
+  			<input type="radio" name="gender" id="v2" value="privatni"> Privatni<br>  
+		</form> </td></tr>
+		<tr><td align="right">Dozvoljeni komentari:</td><td><form>
+  			<input type="radio" name="gender" id="k1" value="da"> Da<br>
+  			<input type="radio" name="gender" id="k2" value="ne"> Ne<br>  
+		</form> </td></tr>
+		<tr><td align="right">Rejting:</td><td><form>
+  			<input type="radio" name="gender" id="r1" value="da"> Da<br>
+  			<input type="radio" name="gender" id="r2" value="ne"> Ne<br>  
+		</form> </td></tr>
+		<tr><td/><td><input type="submit" value="Izmeni video" id="izmeniSubmit"></td></tr>
+	</table>
+	<p style="color: red;" id="messageParagraph"/>
+</body>
+</html>

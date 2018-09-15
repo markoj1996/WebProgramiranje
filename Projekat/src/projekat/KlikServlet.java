@@ -14,6 +14,9 @@ import javax.servlet.http.HttpSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import projekat.dao.LikeDislikeDAO;
+import projekat.dao.LikeKorisniciDAO;
+import projekat.dao.SubscribeDAO;
+import projekat.dao.UserDAO;
 import projekat.dao.VideoDAO;
 import projekat.model.Korisnik;
 import projekat.model.LikeDislike;
@@ -44,22 +47,41 @@ public class KlikServlet extends HttpServlet {
 		int brojLike=0;
 		int brojDislike=0;
 		
-		for(LikeDislike l : lista)
-		{
-			if(l.getVideo()==video.getID())
+		if(lista.size()!=0) {
+			for(LikeDislike l : lista)
 			{
-				if(l.getLike()==1)
+				if(l.getVideo()==video.getID())
 				{
-					brojLike+=1;
-				}
-				else
-				{
-					brojDislike+=1;
+					if(l.getLike()==1)
+					{
+						brojLike+=1;
+					}
+					else
+					{
+						brojDislike+=1;
+					}
 				}
 			}
 		}
 		
 		Korisnik loggedInUser = (Korisnik) session.getAttribute("user");
+		
+		ArrayList<String> listaSub = SubscribeDAO.getAll();
+		String subscribed = "no";
+		if(listaSub.size()!=0) {
+		for(String s : listaSub) 
+		{
+			String u=s.split(",")[0];
+			String u1=s.split(",")[1];
+			if(loggedInUser!=null)
+			if(video.getVlasnik().equals(u) && loggedInUser.getKorisnickoIme().equals(u1)) 
+			{
+				subscribed = "yes";
+			}
+		}
+		}
+		
+		
 		
 		if (loggedInUser == null) {
 			Map<String, Object> data = new HashMap<>();
@@ -78,6 +100,7 @@ public class KlikServlet extends HttpServlet {
 			data.put("id", id);
 			data.put("brojLike", brojLike);
 			data.put("brojDislike", brojDislike);
+			data.put("subscribed", subscribed);
 
 			ObjectMapper mapper = new ObjectMapper();
 			String jsonData = mapper.writeValueAsString(data);
@@ -85,10 +108,144 @@ public class KlikServlet extends HttpServlet {
 
 			response.setContentType("application/json");
 			response.getWriter().write(jsonData);
-//			response.sendRedirect("./Login.html");
 			return;
 		}
 		
+		ArrayList<LikeDislike> ld = LikeDislikeDAO.getAll();
+		ArrayList<String> lk = LikeKorisniciDAO.getAll();
+		
+		ArrayList<LikeDislike> listaKor = new ArrayList<>();
+		
+		for(LikeDislike ll : ld) 
+		{
+			if(ll.getVideo()==id) 
+			{
+				listaKor.add(ll);
+			}
+		}
+		
+		int broj = listaKor.size();
+		
+		String liked = "liked";
+		
+		if(broj>0) 
+		{
+			for(LikeDislike l : ld) 
+			{
+					for(String s : lk) 
+					{
+						int idK = Integer.parseInt(s.split(",")[0]);
+						String korisnik = s.split(",")[1];
+						int likeDislike = Integer.parseInt(s.split(",")[2]);
+						if(korisnik.equals(loggedInUser.getKorisnickoIme())) 
+						{
+							if(l.getVideo()==id && l.getID()==likeDislike)
+							{
+								if(l.getLike()==1) 
+								{
+									Map<String, Object> data = new HashMap<>();
+									data.put("status", "success");
+									data.put("video", video);
+									data.put("slika", slika);
+									data.put("opis", opis);
+									data.put("vidljivost", vidljivost);
+									data.put("dozKom", dozKom);
+									data.put("vidRejt", vidRejt);
+									data.put("blokiran", blokiran);
+									data.put("brPregleda", brPregleda);
+									data.put("datum", datum);
+									data.put("vlasnik", vlasnik);
+									data.put("id", id);
+									data.put("brojLike", brojLike);
+									data.put("brojDislike", brojDislike);
+									data.put("user", loggedInUser);
+									data.put("liked", liked);
+									data.put("subscribed", subscribed);
+
+									ObjectMapper mapper = new ObjectMapper();
+									String jsonData = mapper.writeValueAsString(data);
+									System.out.println(jsonData);
+
+									response.setContentType("application/json");
+									response.getWriter().write(jsonData);
+									return;
+								}
+								else if(l.getLike()==0)
+								{
+									liked = "disliked";
+									Map<String, Object> data = new HashMap<>();
+									data.put("status", "success");
+									data.put("video", video);
+									data.put("slika", slika);
+									data.put("opis", opis);
+									data.put("vidljivost", vidljivost);
+									data.put("dozKom", dozKom);
+									data.put("vidRejt", vidRejt);
+									data.put("blokiran", blokiran);
+									data.put("brPregleda", brPregleda);
+									data.put("datum", datum);
+									data.put("vlasnik", vlasnik);
+									data.put("id", id);
+									data.put("brojLike", brojLike);
+									data.put("brojDislike", brojDislike);
+									data.put("user", loggedInUser);
+									data.put("liked", liked);
+									data.put("subscribed", subscribed);
+
+									ObjectMapper mapper = new ObjectMapper();
+									String jsonData = mapper.writeValueAsString(data);
+									System.out.println(jsonData);
+
+									response.setContentType("application/json");
+									response.getWriter().write(jsonData);
+									return;
+								}
+							}
+							else 
+							{
+								continue;
+							}
+						
+						}
+						else 
+						{
+							continue;
+						}
+						
+				}
+			}
+		}
+		else 
+		{
+			liked = "like";
+			Map<String, Object> data = new HashMap<>();
+			data.put("status", "success");
+			data.put("video", video);
+			data.put("slika", slika);
+			data.put("opis", opis);
+			data.put("vidljivost", vidljivost);
+			data.put("dozKom", dozKom);
+			data.put("vidRejt", vidRejt);
+			data.put("blokiran", blokiran);
+			data.put("brPregleda", brPregleda);
+			data.put("datum", datum);
+			data.put("vlasnik", vlasnik);
+			data.put("id", id);
+			data.put("brojLike", brojLike);
+			data.put("brojDislike", brojDislike);
+			data.put("user", loggedInUser);
+			data.put("liked", liked);
+			data.put("subscribed", subscribed);
+
+			ObjectMapper mapper = new ObjectMapper();
+			String jsonData = mapper.writeValueAsString(data);
+			System.out.println(jsonData);
+
+			response.setContentType("application/json");
+			response.getWriter().write(jsonData);
+			return;
+		}
+		liked = "like";
 		Map<String, Object> data = new HashMap<>();
 		data.put("status", "success");
 		data.put("video", video);
@@ -105,6 +262,8 @@ public class KlikServlet extends HttpServlet {
 		data.put("brojLike", brojLike);
 		data.put("brojDislike", brojDislike);
 		data.put("user", loggedInUser);
+		data.put("liked", liked);
+		data.put("subscribed", subscribed);
 
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonData = mapper.writeValueAsString(data);
@@ -112,7 +271,6 @@ public class KlikServlet extends HttpServlet {
 
 		response.setContentType("application/json");
 		response.getWriter().write(jsonData);
-		
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -128,12 +286,12 @@ public class KlikServlet extends HttpServlet {
 		String vlasnik = request.getParameter("vlasnik");
 		int id = Integer.parseInt(request.getParameter("id"));
 
-		Video video2 = new Video(id, video, slika, opis, vidljivost, dozKom	, vidRejt, blokiran, brPregleda, datum, vlasnik);
+		Korisnik vlasnikV= UserDAO.get(vlasnik);
+		Video video2 = new Video(id, video, slika, opis, vidljivost, dozKom	, vidRejt, blokiran, brPregleda, datum, vlasnik,vlasnikV);
 		
 		VideoDAO.update(video2);
 		
 		String message = "Uspesna prijava!";
-//		String link = "<a href=\"WebShopServlet\">Nastavak</a>";
 		String status = "success";
 		
 		HttpSession session = request.getSession();

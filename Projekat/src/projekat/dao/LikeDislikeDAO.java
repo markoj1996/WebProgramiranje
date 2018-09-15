@@ -10,26 +10,52 @@ import projekat.model.LikeDislike;
 import projekat.model.Video;
 
 public class LikeDislikeDAO {
+	
+	public static int get(Video v) {
+		Connection conn = ConnManager.getConnection();
+
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		try {
+			String query = "select * from LikeDislike where video = ?"; // bezbedno u odnosu na SQL injection napad
+
+			// kreiranje SQL naredbe, jednom za svaki SQL upit
+			pstmt = conn.prepareStatement(query);
+			pstmt.setInt(1, v.getID());
+			System.out.println(pstmt);
+			// izvrsavanje naredbe i prihvatanje rezultata (SELECT), jednom za svaki SQL upit
+			rset = pstmt.executeQuery();
+
+			// citanje rezultata upita
+			if (rset.next()) {				
+				int index = 1;
+				int id = rset.getInt(index++);
+				int like = rset.getInt(index++);
+				String datumKreiranja = rset.getString(index++);
+				int video = rset.getInt(index++);
+				
+				return id;
+			}
+		} catch (SQLException ex) {
+			System.out.println("Greska u SQL upitu!");
+			ex.printStackTrace();
+		} finally {
+			// zatvaranje naredbe i rezultata
+//			try {stmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+			try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+			try {rset.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+		}
+
+		return 0;
+	}
 
 	public static LikeDislike get(int id) {
 		Connection conn = ConnManager.getConnection();
 
-//		Statement stmt = null;
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		try {
-			// SQL upit
-			// OBAVEZNO PISATI NAZIVE TABELA I KOLONA IDENTICNO (cak i po case-u) KAO U SKRIPTI ZA KREIRANJE BAZE!
-//			String query = "SELECT password, role FROM users WHERE userName = '" + userName + "'"; // osetljivo na SQL injection napad!
-//			System.out.println(query);
-//
-//			// kreiranje SQL naredbe, jednom za svaki SQL upit
-//			stmt = conn.createStatement();
-//			// izvrsavanje naredbe i prihvatanje rezultata (SELECT), jednom za svaki SQL upit
-//			rset = stmt.executeQuery(query);
-/*videoURL, slicica, opis, vidljivost, dozvoljeniKomentari, vidljivostRejtinga, blokiran, brojPregleda, out, user);
-		*/
-			String query = "SELECT likee,datumKreiranja,video FROM LikeDislike WHERE ID = ?"; // bezbedno u odnosu na SQL injection napad
+			String query = "select likee,datumkreiranja,video from LikeDislike where id = ?"; // bezbedno u odnosu na SQL injection napad
 
 			// kreiranje SQL naredbe, jednom za svaki SQL upit
 			pstmt = conn.prepareStatement(query);
@@ -40,7 +66,6 @@ public class LikeDislikeDAO {
 
 			// citanje rezultata upita
 			if (rset.next()) {
-//int iD, Boolean like, String datumKreiranja, int video				
 				int index = 1;
 				int like = rset.getInt(index++);
 				String datumKreiranja = rset.getString(index++);
@@ -70,7 +95,7 @@ public static ArrayList<LikeDislike> getAll() {
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		try {
-			String query = "SELECT * FROM LikeDislike"; // bezbedno u odnosu na SQL injection napad
+			String query = "select * from LikeDislike"; // bezbedno u odnosu na SQL injection napad
 
 			// kreiranje SQL naredbe, jednom za svaki SQL upit
 			pstmt = conn.prepareStatement(query);
@@ -113,11 +138,12 @@ public static boolean add(LikeDislike like) {
 	PreparedStatement pstmt = null;
 	try {
 		
-		String query = "INSERT INTO LIKEDISLIKE (likee,datumKreiranja,video) VALUES (?, ?, ?)";
+		String query = "insert into LikeDislike (id,likee,datumkreiranja,video) values (?,?, ?, ?)";
 
 		
 		pstmt = conn.prepareStatement(query);
 		int index = 1;
+		pstmt.setInt(index++, like.getID());
 		pstmt.setInt(index++, like.getLike());
 		pstmt.setString(index++, like.getDatumKreiranja());
 		pstmt.setInt(index++, like.getVideo());
@@ -135,5 +161,94 @@ public static boolean add(LikeDislike like) {
 
 	return false;
 }
+
+public static boolean delete(int id, int video) {
+	Connection conn = ConnManager.getConnection();
+
+	PreparedStatement pstmt = null;
+	try {
+		
+		String query = "delete from LikeDislike where id = ? and video = ?";
+
+		pstmt = conn.prepareStatement(query);
+		int index = 1;
+		pstmt.setInt(index++, id);
+		pstmt.setInt(index++, video);
+		System.out.println(pstmt);
+
+		boolean success = pstmt.executeUpdate() == 1;
+		
+		return success;
+	} catch (SQLException ex) {
+		System.out.println("Greska u SQL upitu!");
+		ex.printStackTrace();
+		
+		try {conn.rollback();} catch (SQLException ex1) {ex1.printStackTrace();}
+	} finally {
+		try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+
+		try {conn.setAutoCommit(true);} catch (SQLException ex1) {ex1.printStackTrace();}
+	}
+
+	return false;
+}
+
+public static boolean delete(Video video) {
+	Connection conn = ConnManager.getConnection();
+
+	PreparedStatement pstmt = null;
+	try {
+		
+		String query = "delete from  LikeDislike where video=?";
+
+		
+		pstmt = conn.prepareStatement(query);
+		int index = 1;
+		pstmt.setInt(index++, video.getID());
+		
+		System.out.println(pstmt);
+		// izvrsavanje naredbe i prihvatanje rezultata (INSERT, UPDATE, DELETE), jednom za svaki SQL upit
+		return pstmt.executeUpdate() == 1;
+	} catch (SQLException ex) {
+		System.out.println("Greska u SQL upitu!");
+		ex.printStackTrace();
+	} finally {
+		// zatvaranje naredbe i rezultata
+		try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+	}
+
+	return false;
+}
 	
+public static boolean update(LikeDislike like,int id) {
+	Connection conn = ConnManager.getConnection();
+
+	PreparedStatement pstmt = null;
+	try {
+		
+		String query = "update LikeDislike set id=?,likee=?,datumkreiranja=?,video=? where id=?";
+
+		
+		pstmt = conn.prepareStatement(query);
+		int index = 1;
+		pstmt.setInt(index++, like.getID());
+		pstmt.setInt(index++, id);
+		pstmt.setString(index++, like.getDatumKreiranja());
+		pstmt.setInt(index++, like.getVideo());
+		pstmt.setInt(index++, like.getID());
+		
+		System.out.println(pstmt);
+		// izvrsavanje naredbe i prihvatanje rezultata (INSERT, UPDATE, DELETE), jednom za svaki SQL upit
+		return pstmt.executeUpdate() == 1;
+	} catch (SQLException ex) {
+		System.out.println("Greska u SQL upitu!");
+		ex.printStackTrace();
+	} finally {
+		// zatvaranje naredbe i rezultata
+		try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+	}
+
+	return false;
+}
+
 }

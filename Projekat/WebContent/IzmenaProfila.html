@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Izmena profila</title>
+<link rel="stylesheet" type="text/css" href="still.css">
+<script src="jquery-3.2.1.js"></script>
+<script>
+$(document).ready(function() {
+
+	$.get('IzmenaProfilaServlet', function(data) {
+		var user = data.user;
+		var userNameInput = $('#userNameInput');
+		var passwordInput = $('#passwordInput');
+		var imeInput = $('#imeInput');
+		var prezimeInput = $('#PrezimeInput');
+		var eMailInput = $('#EmailInput');
+		userNameInput.val(user.korisnickoIme); 
+		passwordInput.val(user.lozinka);
+		imeInput.val(user.ime);
+		prezimeInput.val(user.prezime);
+		eMailInput.val(user.email);
+		
+		var messageParagraph = $('#messageParagraph');
+		
+		$('#registrationSubmit').on('click', function(event) { 
+			var userName = userNameInput.val();
+			var password = passwordInput.val();
+			var ime = imeInput.val();
+			var prezime = prezimeInput.val();
+			var eMail = eMailInput.val();
+			
+			console.log('userName: ' + userName);
+			console.log('password: ' + password);
+			console.log('ime: ' + ime);
+			console.log('prezime: ' + prezime);
+			console.log('email: ' + eMail);
+			
+			$.post('IzmenaProfilaServlet', {'userName': userName, 'password': password,'ime': ime,'prezime': prezime,'email':eMail}, function(data) { 
+
+				console.log('stigao odgovor');
+				console.log(data);
+
+				messageParagraph.text(data.message);
+				if (data.status == 'success') {
+					window.location.replace('PocetnaStrana.html');
+				}
+			});
+			console.log('poslat zahtev');
+
+			event.preventDefault();
+			return false;
+		});
+		
+	});
+});
+</script>
+</head>
+<body>
+	<div class="menu_bg">
+    			<div id="menu">
+    				<ul>
+            			<li><div id="slika">
+            				<img src="images/logo.jpg">
+            			</div></li>
+            			<li><div id="pretraga">
+            				<input type="text" name="search_box" id="search_box" value="" />
+	                		<input type="submit" name="search_button" id="search_button" value="" />
+            			</div></li>
+            			<li><div id="uploaddiv">
+            				<input id="upload" type="image" src="images/upload.jpg">
+            			</div></li>
+            			<li><div id="dugmici">
+            			<ul>
+            				<li><a id="login12" href="Login.html">LOGIN</a></li>
+            				<li><a id="logout12" href="LogoutServlet">LOGOUT</a></li>
+            				<li><a id="channel12" href="Channel.html">CHANNELS</a></li>
+            				<li><a id="registracija12" href="Registracija.html">SIGN UP</a></li>
+           				</ul>
+        			</ul>
+    			</div>
+    		</div> 
+	<div id="registracija">
+	<h1>Izmena:</h1>
+	<table>
+		<tr><td align="right">Korisnicko ime:</td><td><input type="text" id="userNameInput"/></td></tr>
+		<tr><td align="right">Lozinka:</td><td><input type="password" id="passwordInput"/></td></tr>
+		<tr><td align="right">Ime:</td><td><input type="text" id="imeInput"/></td></tr>
+		<tr><td align="right">Prezime:</td><td><input type="text" id="PrezimeInput"/></td></tr>
+		<tr><td align="right">E-mail:</td><td><input type="text" id="EmailInput"/></td></tr>
+		<tr><td/><td><input type="submit" value="Registracija" id="registrationSubmit"></td></tr>
+	</table>
+	<p style="color: red;" id="messageParagraph"/>
+	</div>
+	<footer>
+	    	Copyright &copy; 2017. Jankovic Marko
+	</footer>
+</body>
+</html>

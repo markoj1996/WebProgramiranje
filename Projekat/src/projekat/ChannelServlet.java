@@ -39,14 +39,17 @@ public class ChannelServlet extends HttpServlet {
 
 			response.setContentType("application/json");
 			response.getWriter().write(jsonData);
-//			response.sendRedirect("./Login.html");
 			return;
 		}
 		
-		ArrayList<Integer> lista = LikeKorisniciDAO.getAll();
+		ArrayList<String> lista = LikeKorisniciDAO.getAll();
 		
-		for(int like : lista)
+		for(String s : lista)
 		{
+			int idK = Integer.parseInt(s.split(",")[0]);
+			String korisnik = s.split(",")[1];
+			int like = Integer.parseInt(s.split(",")[2]);
+			
 			LikeDislike ld = LikeDislikeDAO.get(like);
 			ArrayList<LikeDislike> listalike = new ArrayList<>();
 			listalike.add(ld);

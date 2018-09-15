@@ -18,22 +18,10 @@ public class VideoDAO {
 	public static Video get(int id) {
 		Connection conn = ConnManager.getConnection();
 
-//		Statement stmt = null;
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		try {
-			// SQL upit
-			// OBAVEZNO PISATI NAZIVE TABELA I KOLONA IDENTICNO (cak i po case-u) KAO U SKRIPTI ZA KREIRANJE BAZE!
-//			String query = "SELECT password, role FROM users WHERE userName = '" + userName + "'"; // osetljivo na SQL injection napad!
-//			System.out.println(query);
-//
-//			// kreiranje SQL naredbe, jednom za svaki SQL upit
-//			stmt = conn.createStatement();
-//			// izvrsavanje naredbe i prihvatanje rezultata (SELECT), jednom za svaki SQL upit
-//			rset = stmt.executeQuery(query);
-/*videoURL, slicica, opis, vidljivost, dozvoljeniKomentari, vidljivostRejtinga, blokiran, brojPregleda, out, user);
-		*/
-			String query = "SELECT video,slicica,opis,vidljivost,dozvoljeniKomentari,vidljivostRejtinga,blokiran,brojPregleda,datumKreiranja,vlasnik FROM Video WHERE ID = ?"; // bezbedno u odnosu na SQL injection napad
+			String query = "select video,slicica,opis,vidljivost,dozvoljenikomentari,vidljivostrejtinga,blokiran,brojpregleda,datumkreiranja,vlasnik from Video where id = ?"; // bezbedno u odnosu na SQL injection napad
 
 			// kreiranje SQL naredbe, jednom za svaki SQL upit
 			pstmt = conn.prepareStatement(query);
@@ -55,11 +43,9 @@ public class VideoDAO {
 				int brojPregleda = rset.getInt(index++);
 				String datumKreiranja = rset.getString(index++);
 				String vlasnik = rset.getString(index++);
-//				String password = rset.getString("password");
-//				Role role = Role.valueOf(rset.getString("role"));
 
-				
-				return new Video(id,video,slicica,opis,vidljivost,dozvoljeniKomentari,vidljivostRejtinga,blokiran,brojPregleda,datumKreiranja,vlasnik);
+				Korisnik vlasnikV= UserDAO.get(vlasnik);
+				return new Video(id,video,slicica,opis,vidljivost,dozvoljeniKomentari,vidljivostRejtinga,blokiran,brojPregleda,datumKreiranja,vlasnik,vlasnikV);
 			}
 		} catch (SQLException ex) {
 			System.out.println("Greska u SQL upitu!");
@@ -74,6 +60,97 @@ public class VideoDAO {
 		return null;
 	}
 
+	public static List<Video> getAll(String nameFilter, int lowFilter, int highFilter,String sort) {
+		List<Video> videos = new ArrayList<>();
+
+		Connection conn = ConnManager.getConnection();
+
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		if(sort.equals("Sortiraj po imenu")) 
+		{
+			try {
+				String query = "select id,video,slicica,opis,vidljivost,dozvoljenikomentari,vidljivostrejtinga,blokiran,brojpregleda,datumkreiranja,vlasnik from Video where (opis like ? or vlasnik like ?) and brojpregleda >= ? and brojpregleda <= ? order by opis";
+
+				pstmt = conn.prepareStatement(query);
+				int index = 1;
+				pstmt.setString(index++, "%" + nameFilter + "%");
+				pstmt.setString(index++, "%" + nameFilter + "%");
+				pstmt.setInt(index++, lowFilter);
+				pstmt.setInt(index++, highFilter);
+				System.out.println(pstmt);
+
+				rset = pstmt.executeQuery();
+				while (rset.next()) {
+					index = 1;
+					int id = rset.getInt(index++);
+					String videoV = rset.getString(index++);
+					String slicica = rset.getString(index++);
+					String opis = rset.getString(index++);
+					String vidljivost = rset.getString(index++);
+					int dozvoljeniKomentari = rset.getInt(index++);
+					int vidljivostRejtinga = rset.getInt(index++);
+					int blokiran = rset.getInt(index++);
+					int brojPregleda = rset.getInt(index++);
+					String datumKreiranja = rset.getString(index++);
+					String vlasnik = rset.getString(index++);
+
+					Korisnik vlasnikV= UserDAO.get(vlasnik);
+					Video video = new Video(id,videoV, slicica, opis, vidljivost, dozvoljeniKomentari, vidljivostRejtinga, blokiran, brojPregleda, datumKreiranja, vlasnik,vlasnikV);
+					videos.add(video);
+				}
+			} catch (SQLException ex) {
+				System.out.println("Greska u SQL upitu!");
+				ex.printStackTrace();
+			} finally {
+				try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+				try {rset.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+			}
+		}else 
+		{
+			try {
+				String query = "select id,video,slicica,opis,vidljivost,dozvoljenikomentari,vidljivostrejtinga,blokiran,brojpregleda,datumkreiranja,vlasnik from Video where (opis like ? or vlasnik like ?) and brojpregleda >= ? and brojpregleda <= ? order by datumkreiranja";
+
+				pstmt = conn.prepareStatement(query);
+				int index = 1;
+				pstmt.setString(index++, "%" + nameFilter + "%");
+				pstmt.setString(index++, "%" + nameFilter + "%");
+				pstmt.setInt(index++, lowFilter);
+				pstmt.setInt(index++, highFilter);
+				System.out.println(pstmt);
+
+				rset = pstmt.executeQuery();
+				while (rset.next()) {
+					index = 1;
+					int id = rset.getInt(index++);
+					String videoV = rset.getString(index++);
+					String slicica = rset.getString(index++);
+					String opis = rset.getString(index++);
+					String vidljivost = rset.getString(index++);
+					int dozvoljeniKomentari = rset.getInt(index++);
+					int vidljivostRejtinga = rset.getInt(index++);
+					int blokiran = rset.getInt(index++);
+					int brojPregleda = rset.getInt(index++);
+					String datumKreiranja = rset.getString(index++);
+					String vlasnik = rset.getString(index++);
+
+					Korisnik vlasnikV= UserDAO.get(vlasnik);
+					Video video = new Video(id,videoV, slicica, opis, vidljivost, dozvoljeniKomentari, vidljivostRejtinga, blokiran, brojPregleda, datumKreiranja, vlasnik,vlasnikV);
+					videos.add(video);
+				}
+			} catch (SQLException ex) {
+				System.out.println("Greska u SQL upitu!");
+				ex.printStackTrace();
+			} finally {
+				try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+				try {rset.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+			}
+		}
+		
+		
+		return videos;
+	}
+	
 	public static ArrayList<Video> getAll() {
 		
 		ArrayList<Video> lista = new ArrayList<>();
@@ -83,7 +160,7 @@ public class VideoDAO {
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		try {
-			String query = "SELECT id,video,slicica,opis,vidljivost,dozvoljeniKomentari,vidljivostRejtinga,blokiran,brojPregleda,datumKreiranja,vlasnik FROM Video"; // bezbedno u odnosu na SQL injection napad
+			String query = "select id,video,slicica,opis,vidljivost,dozvoljenikomentari,vidljivostrejtinga,blokiran,brojpregleda,datumkreiranja,vlasnik from video"; // bezbedno u odnosu na SQL injection napad
 
 			// kreiranje SQL naredbe, jednom za svaki SQL upit
 			pstmt = conn.prepareStatement(query);
@@ -105,11 +182,9 @@ public class VideoDAO {
 				int brojPregleda = rset.getInt(index++);
 				String datumKreiranja = rset.getString(index++);
 				String vlasnik = rset.getString(index++);
-//				String password = rset.getString("password");
-//				Role role = Role.valueOf(rset.getString("role"));
 
-				
-				Video video = new Video(id,videos,slicica,opis,vidljivost,dozvoljeniKomentari,vidljivostRejtinga,blokiran,brojPregleda,datumKreiranja,vlasnik);
+				Korisnik vlasnikV= UserDAO.get(vlasnik);
+				Video video = new Video(id,videos,slicica,opis,vidljivost,dozvoljeniKomentari,vidljivostRejtinga,blokiran,brojPregleda,datumKreiranja,vlasnik,vlasnikV);
 				lista.add(video);
 						
 			}
@@ -135,7 +210,7 @@ public class VideoDAO {
 		PreparedStatement pstmt = null;
 		try {
 			
-			String query = "INSERT INTO Video (video,slicica,opis,vidljivost,dozvoljeniKomentari,vidljivostRejtinga,blokiran,brojPregleda,datumKreiranja,vlasnik) VALUES (?, ?, ?,?,?,?,?,?,?,?)";
+			String query = "insert into Video (video,slicica,opis,vidljivost,dozvoljenikomentari,vidljivostrejtinga,blokiran,brojpregleda,datumkreiranja,vlasnik) values (?, ?, ?,?,?,?,?,?,?,?)";
 
 			
 			pstmt = conn.prepareStatement(query);
@@ -165,13 +240,77 @@ public class VideoDAO {
 		return false;
 	}
 	
+	public static boolean update(Video video,int blokiran) {
+		Connection conn = ConnManager.getConnection();
+
+		PreparedStatement pstmt = null;
+		try {
+			
+			String query = "update Video set video=?,slicica=?,opis=?,vidljivost=?,dozvoljeniKomentari=?,vidljivostRejtinga=?,blokiran=?,brojPregleda=?,datumKreiranja=?,vlasnik=? where id=?";
+
+			
+			pstmt = conn.prepareStatement(query);
+			int index = 1;
+			pstmt.setString(index++, video.getVideoURL());
+			pstmt.setString(index++, video.getSlikaURL());
+			pstmt.setString(index++, video.getOpis());
+			pstmt.setString(index++, video.getVidljivost());
+			pstmt.setInt(index++, video.getDozvoljeniKomentari());
+			pstmt.setInt(index++, video.getVidljivostRejtinga());
+			pstmt.setInt(index++, blokiran);
+			pstmt.setInt(index++, video.getBrojPregleda());
+			pstmt.setString(index++, video.getDatumKreiranja().toString());
+			pstmt.setString(index++, video.getVlasnik());
+			pstmt.setInt(index++, video.getID());
+			
+			System.out.println(pstmt);
+			// izvrsavanje naredbe i prihvatanje rezultata (INSERT, UPDATE, DELETE), jednom za svaki SQL upit
+			return pstmt.executeUpdate() == 1;
+		} catch (SQLException ex) {
+			System.out.println("Greska u SQL upitu!");
+			ex.printStackTrace();
+		} finally {
+			// zatvaranje naredbe i rezultata
+			try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+		}
+
+		return false;
+	}
+	
+	public static boolean delete(Video video) {
+		Connection conn = ConnManager.getConnection();
+
+		PreparedStatement pstmt = null;
+		try {
+			
+			String query = "Delete from  Video where id=?";
+
+			
+			pstmt = conn.prepareStatement(query);
+			int index = 1;
+			pstmt.setInt(index++, video.getID());
+			
+			System.out.println(pstmt);
+			// izvrsavanje naredbe i prihvatanje rezultata (INSERT, UPDATE, DELETE), jednom za svaki SQL upit
+			return pstmt.executeUpdate() == 1;
+		} catch (SQLException ex) {
+			System.out.println("Greska u SQL upitu!");
+			ex.printStackTrace();
+		} finally {
+			// zatvaranje naredbe i rezultata
+			try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+		}
+
+		return false;
+	}
+	
 	public static boolean update(Video video) {
 		Connection conn = ConnManager.getConnection();
 
 		PreparedStatement pstmt = null;
 		try {
 			
-			String query = "Update Video set video=?,slicica=?,opis=?,vidljivost=?,dozvoljeniKomentari=?,vidljivostRejtinga=?,blokiran=?,brojPregleda=?,datumKreiranja=?,vlasnik=? where id=?";
+			String query = "update Video set video=?,slicica=?,opis=?,vidljivost=?,dozvoljenikomentari=?,vidljivostrejtinga=?,blokiran=?,brojpregleda=?,datumkreiranja=?,vlasnik=? where id=?";
 
 			
 			pstmt = conn.prepareStatement(query);

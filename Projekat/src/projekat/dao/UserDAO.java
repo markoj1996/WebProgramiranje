@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import projekat.model.Korisnik;
+import projekat.model.Video;
 import projekat.model.Korisnik.Uloga;
 
 public class UserDAO {
@@ -17,21 +18,10 @@ public class UserDAO {
 	public static Korisnik get(String userName) {
 		Connection conn = ConnManager.getConnection();
 
-//		Statement stmt = null;
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
 		try {
-			// SQL upit
-			// OBAVEZNO PISATI NAZIVE TABELA I KOLONA IDENTICNO (cak i po case-u) KAO U SKRIPTI ZA KREIRANJE BAZE!
-//			String query = "SELECT password, role FROM users WHERE userName = '" + userName + "'"; // osetljivo na SQL injection napad!
-//			System.out.println(query);
-//
-//			// kreiranje SQL naredbe, jednom za svaki SQL upit
-//			stmt = conn.createStatement();
-//			// izvrsavanje naredbe i prihvatanje rezultata (SELECT), jednom za svaki SQL upit
-//			rset = stmt.executeQuery(query);
-
-			String query = "SELECT password,ime,prezime,email,opis,datumRegistracije,blokiran,role FROM Korisnici WHERE userName = ?"; // bezbedno u odnosu na SQL injection napad
+			String query = "select password,ime,prezime,email,opis,datumregistracije,blokiran,role from Korisnici where username = ?"; // bezbedno u odnosu na SQL injection napad
 
 			// kreiranje SQL naredbe, jednom za svaki SQL upit
 			pstmt = conn.prepareStatement(query);
@@ -51,8 +41,6 @@ public class UserDAO {
 				String datumRegistracije = rset.getString(index++);
 				int blokiran = rset.getInt(index++);
 				Uloga role = Uloga.valueOf(rset.getString(index++));
-//				String password = rset.getString("password");
-//				Role role = Role.valueOf(rset.getString("role"));
 
 				
 				return new Korisnik(userName, password,ime,prezime,email,opis,datumRegistracije,role,blokiran);
@@ -70,6 +58,51 @@ public class UserDAO {
 		return null;
 	}
 
+	public static List<Korisnik> getAll(String nameFilter, int lowFilter) {
+		List<Korisnik> users = new ArrayList<>();
+
+		Connection conn = ConnManager.getConnection();
+
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		try {
+			String query = "select * from Korisnici where ime like ? or prezime like ? or username like ?";
+
+			pstmt = conn.prepareStatement(query);
+			int index = 1;
+			pstmt.setString(index++, "%" + nameFilter + "%");
+			pstmt.setString(index++, "%" + nameFilter + "%");
+			pstmt.setString(index++, "%" + nameFilter + "%");
+			System.out.println(pstmt);
+
+			rset = pstmt.executeQuery();
+			while (rset.next()) {
+				index = 1;
+				String userName = rset.getString(index++);
+				String password = rset.getString(index++);
+				String ime = rset.getString(index++);
+				String prezime = rset.getString(index++);
+				String email = rset.getString(index++);
+				String opis = rset.getString(index++);
+				String datumRegistracije = rset.getString(index++);
+				Uloga role = Uloga.valueOf(rset.getString(index++));
+				int blokiran = rset.getInt(index++);
+
+				Korisnik user = new Korisnik(userName, password,ime,prezime,email,opis,datumRegistracije,role,blokiran);
+				
+				users.add(user);
+			}
+		} catch (SQLException ex) {
+			System.out.println("Greska u SQL upitu!");
+			ex.printStackTrace();
+		} finally {
+			try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+			try {rset.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+		}
+		
+		return users;
+	}
+	
 	public static List<Korisnik> getAll() {
 		return new ArrayList<>();
 	}
@@ -84,7 +117,7 @@ public class UserDAO {
 		PreparedStatement pstmt = null;
 		try {
 			
-			String query = "INSERT INTO Korisnici (userName, password, ime,prezime,email,opis,datumRegistracije,role,blokiran) VALUES (?, ?, ?,?,?,?,?,?,?)";
+			String query = "insert into Korisnici (username, password, ime,prezime,email,opis,datumregistracije,role,blokiran) values (?, ?, ?,?,?,?,?,?,?)";
 
 			
 			pstmt = conn.prepareStatement(query);
@@ -112,13 +145,74 @@ public class UserDAO {
 
 		return false;
 	}
+	
+	public static boolean update(Korisnik korisnik,int blok) {
+		Connection conn = ConnManager.getConnection();
 
-	/*public static boolean update(User user) {
+		PreparedStatement pstmt = null;
+		try {
+			
+			String query = "update Korisnici set username=?,password=?,ime=?,prezime=?,email=?,datumregistracije=?,role=?,blokiran=? where username=?";
+
+			
+			pstmt = conn.prepareStatement(query);
+			int index = 1;
+			pstmt.setString(index++, korisnik.getKorisnickoIme());
+			pstmt.setString(index++, korisnik.getLozinka());
+			pstmt.setString(index++, korisnik.getIme());
+			pstmt.setString(index++, korisnik.getPrezime());
+			pstmt.setString(index++, korisnik.getEmail());
+			pstmt.setString(index++, korisnik.getDatumRegistracije());
+			pstmt.setString(index++, korisnik.getUloga().toString());
+			pstmt.setInt(index++, blok);
+			pstmt.setString(index++, korisnik.getKorisnickoIme());
+			
+			System.out.println(pstmt);
+			// izvrsavanje naredbe i prihvatanje rezultata (INSERT, UPDATE, DELETE), jednom za svaki SQL upit
+			return pstmt.executeUpdate() == 1;
+		} catch (SQLException ex) {
+			System.out.println("Greska u SQL upitu!");
+			ex.printStackTrace();
+		} finally {
+			// zatvaranje naredbe i rezultata
+			try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+		}
+
 		return false;
 	}
 
-	public static boolean delete(String userName) {
+	public static boolean update(Korisnik korisnik,String uName) {
+		Connection conn = ConnManager.getConnection();
+
+		PreparedStatement pstmt = null;
+		try {
+			
+			String query = "update Korisnici set userName=?,password=?,ime=?,prezime=?,email=?,datumregistracije=?,role=?,blokiran=? where userName=?";
+
+			
+			pstmt = conn.prepareStatement(query);
+			int index = 1;
+			pstmt.setString(index++, korisnik.getKorisnickoIme());
+			pstmt.setString(index++, korisnik.getLozinka());
+			pstmt.setString(index++, korisnik.getIme());
+			pstmt.setString(index++, korisnik.getPrezime());
+			pstmt.setString(index++, korisnik.getEmail());
+			pstmt.setString(index++, korisnik.getDatumRegistracije());
+			pstmt.setString(index++, korisnik.getUloga().toString());
+			pstmt.setInt(index++, korisnik.getBlokiran());
+			pstmt.setString(index++, uName);
+			
+			System.out.println(pstmt);
+			// izvrsavanje naredbe i prihvatanje rezultata (INSERT, UPDATE, DELETE), jednom za svaki SQL upit
+			return pstmt.executeUpdate() == 1;
+		} catch (SQLException ex) {
+			System.out.println("Greska u SQL upitu!");
+			ex.printStackTrace();
+		} finally {
+			// zatvaranje naredbe i rezultata
+			try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+		}
+
 		return false;
 	}
-*/
 }

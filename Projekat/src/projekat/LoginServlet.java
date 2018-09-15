@@ -34,7 +34,6 @@ public class LoginServlet extends HttpServlet {
 		String password = request.getParameter("password");
 
 		String message = "Uspesna prijava!";
-//		String link = "<a href=\"WebShopServlet\">Nastavak</a>";
 		String status = "success";
 		try {
 			Korisnik user = UserDAO.get(userName);
@@ -48,7 +47,6 @@ public class LoginServlet extends HttpServlet {
 			
 		} catch (Exception ex) {
 			message = ex.getMessage();
-//			link = "<a href=\"Login.html\">Povratak</a>";
 			status = "failure";
 		}
 		
@@ -62,11 +60,7 @@ public class LoginServlet extends HttpServlet {
 		System.out.println(jsonData);
 
 		response.setContentType("application/json");
-		response.getWriter().write(jsonData);
-//		request.setAttribute("title", "Registracija");
-//		request.setAttribute("message", message);
-//		request.setAttribute("link", link);
-//		request.getRequestDispatcher("Message.jsp").forward(request, response);	
+		response.getWriter().write(jsonData);	
 	}
 
 }

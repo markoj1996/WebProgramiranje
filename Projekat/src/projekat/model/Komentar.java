@@ -12,13 +12,21 @@ public class Komentar {
 	
 	private int ID;
 	private String sadrzaj;
-	private Date datumKreiranja;
+	private String datumKreiranja;
 	private Korisnik vlasnik;
-	private Video video;
+	private int video;
 	
-	public Komentar(int iD, String sadrzaj, Date datumKreiranja, Korisnik vlasnik, Video video) {
+	
+	
+	public Komentar(String sadrzaj, String datumKreiranja ,Korisnik vlasnik) {
 		super();
-		ID = iD;
+		this.sadrzaj = sadrzaj;
+		this.datumKreiranja = datumKreiranja;
+		this.vlasnik = vlasnik;
+	}
+
+	public Komentar(String sadrzaj, String datumKreiranja, Korisnik vlasnik, int video) {
+		super();
 		this.sadrzaj = sadrzaj;
 		this.datumKreiranja = datumKreiranja;
 		this.vlasnik = vlasnik;
@@ -41,11 +49,11 @@ public class Komentar {
 		this.sadrzaj = sadrzaj;
 	}
 
-	public Date getDatumKreiranja() {
+	public String getDatumKreiranja() {
 		return datumKreiranja;
 	}
 
-	public void setDatumKreiranja(Date datumKreiranja) {
+	public void setDatumKreiranja(String datumKreiranja) {
 		this.datumKreiranja = datumKreiranja;
 	}
 
@@ -57,11 +65,11 @@ public class Komentar {
 		this.vlasnik = vlasnik;
 	}
 
-	public Video getVideo() {
+	public int getVideo() {
 		return video;
 	}
 
-	public void setVideo(Video video) {
+	public void setVideo(int video) {
 		this.video = video;
 	}
 	

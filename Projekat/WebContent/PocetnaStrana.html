@@ -9,125 +9,330 @@
 /*$(".channeloptions h2").text(result);*/
 $(document).ready(function() {
 	
-		$('#upload').on('click', function(event) {
-			window.location.replace('Video.html');
+	var sort = $('#selectSort option:selected').text();
+	
+	$('#more').on('click', function(event) {
+		$(".channeloptions").toggle();
+	});
+	$('#logo').on('click', function(event) {
+		$.get('SearchServlet', function(response) {
+			window.location.replace('PocetnaStrana.html');
 		});
+	});
+	
+	$('#sortiraj').on('click', function(event) {
+		var sort = $('#selectSort option:selected').text();
+		$('.VideoContainer').remove();
+		getVideos(sort);
+	});	
+	
+	var nameFilterInput = $('#search_box');
+	var lowPreglediFilterInput = $('#searchPreglediOd');
+	var highPreglediFilterInput = $('#searchPreglediDo');
+	
+	function getVideos(sort) {
+
+		var nameFilter = nameFilterInput.val();
+		var lowFilter = lowPreglediFilterInput.val();
+		var highFilter = highPreglediFilterInput.val();
+
+		var params = {
+			'nameFilter': nameFilter,
+			'lowFilter': lowFilter,
+			'highFilter': highFilter,
+			'sort':sort
+		};
+		$.get('UcitavanjeServlet', params, function(response) {
+			
+			for(var i=0; i<response.size; i++) {
+				if(response.video[i].vidljivost==="Javni")
+				{
+					var newDiv = $('<div></div>');
+					newDiv.addClass('VideoContainer');
+
+					var video = response.video[i];
+					
+					newDiv.append('<img width="250" height="150" src=' + video.slikaURL +'>'+'</img>'+'<br>'+'<p>'+video.opis+'</p>'+'<h5>'+video.vlasnik+'</h5>'+'</br>'+'<h5>'+video.brojPregleda+' prikaza   *'+'</h5>'+'<h5>'+' '+video.datumKreiranja+'</h5>');
+
+					newDiv.data('video', video.videoURL);
+					newDiv.data('slika', video.slikaURL);
+					newDiv.data('opis', video.opis);
+					newDiv.data('vidljivost', video.vidljivost);
+					newDiv.data('dozvoljeniKom', video.dozvoljeniKomentari);
+					newDiv.data('vidljivostRejtinga', video.vidljivostRejtinga);
+					newDiv.data('blokiran', video.blokiran);
+					newDiv.data('brojPregleda', video.brojPregleda+1);
+					newDiv.data('datum', video.datumKreiranja);
+					newDiv.data('vlasnik', video.vlasnik);
+					newDiv.data('vlasnikBlok', video.vlasnikV.blokiran);
+					newDiv.data('id', video.id);
+
+					$('.sadrzaj').append(newDiv);
+				}else if(response.video[i].vidljivost==="Privatni"&&response.user!=null&&response.user.korisnickoIme==response.video[i].vlasnik)
+				{
+					var newDiv = $('<div></div>');
+					newDiv.addClass('VideoContainer');
+
+					var video = response.video[i];
+					
+					newDiv.append('<img width="250" height="150" src=' + video.slikaURL +'>'+'</img>'+'<br>'+'<p>'+video.opis+'</p>'+'<h5>'+video.vlasnik+'</h5>'+'</br>'+'<h5>'+video.brojPregleda+' prikaza   *'+'</h5>'+'<h5>'+' '+video.datumKreiranja+'</h5>');
+
+					newDiv.data('video', video.videoURL);
+					newDiv.data('slika', video.slikaURL);
+					newDiv.data('opis', video.opis);
+					newDiv.data('vidljivost', video.vidljivost);
+					newDiv.data('dozvoljeniKom', video.dozvoljeniKomentari);
+					newDiv.data('vidljivostRejtinga', video.vidljivostRejtinga);
+					newDiv.data('blokiran', video.blokiran);
+					newDiv.data('brojPregleda', video.brojPregleda+1);
+					newDiv.data('datum', video.datumKreiranja);
+					newDiv.data('vlasnik', video.vlasnik);
+					newDiv.data('vlasnikBlok', video.vlasnikV.blokiran);
+					newDiv.data('id', video.id);
+
+					$('.sadrzaj').append(newDiv);
+				}else if(response.user!=null&&response.user.uloga==="Administrator")
+				{
+					var newDiv = $('<div></div>');
+					newDiv.addClass('VideoContainer');
+
+					var video = response.video[i];
+					
+					newDiv.append('<img width="250" height="150" src=' + video.slikaURL +'>'+'</img>'+'<br>'+'<p>'+video.opis+'</p>'+'<h5>'+video.vlasnik+'</h5>'+'</br>'+'<h5>'+video.brojPregleda+' prikaza   *'+'</h5>'+'<h5>'+' '+video.datumKreiranja+'</h5>');
+
+					newDiv.data('video', video.videoURL);
+					newDiv.data('slika', video.slikaURL);
+					newDiv.data('opis', video.opis);
+					newDiv.data('vidljivost', video.vidljivost);
+					newDiv.data('dozvoljeniKom', video.dozvoljeniKomentari);
+					newDiv.data('vidljivostRejtinga', video.vidljivostRejtinga);
+					newDiv.data('blokiran', video.blokiran);
+					newDiv.data('brojPregleda', video.brojPregleda+1);
+					newDiv.data('datum', video.datumKreiranja);
+					newDiv.data('vlasnik', video.vlasnik);
+					newDiv.data('vlasnikBlok', video.vlasnikV.blokiran);
+					newDiv.data('id', video.id);
+
+					$('.sadrzaj').append(newDiv);
+				}
+				
+			}
+			$(document).on('click', '.VideoContainer', function(e) {
+				var video = $(this).data('video');
+				var slika = $(this).data('slika');
+				var opis = $(this).data('opis');
+				var vidljivost = $(this).data('vidljivost');
+				var dozKom = $(this).data('dozvoljeniKom');
+				var vidRejt = $(this).data('vidljivostRejtinga');
+				var blokiran = $(this).data('blokiran');
+				var brPregleda = $(this).data('brojPregleda');
+				var datum = $(this).data('datum');
+				var vlasnik = $(this).data('vlasnik');
+				var vlasnikBlok = $(this).data('vlasnikBlok');
+				var id = $(this).data('id');
+				
+				if(response.user==null)
+				{
+					if(blokiran!=1)
+					{
+						if(vlasnikBlok!=1)
+						{
+							$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
+								
+								window.location.replace('PrikazVidea.html');
+								
+							});
+						}else
+						{
+							alert("Korisnik je blokiran!");
+						}
+						
+					}else if(blokiran==1&&vlasnik===response.user.korisnickoIme)
+					{
+						$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
+							
+							window.location.replace('PrikazVidea.html');
+							
+						});
+					}else if(response.user.korisnickoIme==null)
+					{
+						 alert("Video je blokiran!");
+					}else{
+						alert("Video je blokiran!");
+					}
+				}else
+				{
+					if(response.user.uloga==="Administrator")
+					{
+							$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
+							
+							window.location.replace('PrikazVidea.html');
+							
+						});
+					}
+					else
+					{
+						if(blokiran!=1)
+						{
+							if(vlasnikBlok!=1)
+							{
+								$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
+									
+									window.location.replace('PrikazVidea.html');
+									
+								});
+							}else if(vlasnik==response.user.korisnickoIme)
+							{
+									$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
+									
+									window.location.replace('PrikazVidea.html');
+									
+								});
+							}
+							else
+							{
+								alert("Video je blokiran!");
+							}
+							
+						}
+						else if(blokiran==1&&vlasnik===response.user.korisnickoIme)
+						{
+							$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
+								
+								window.location.replace('PrikazVidea.html');
+								
+							});
+						}else if(response.user.korisnickoIme==null)
+						{
+							 alert("Video je blokiran!");
+						}else{
+							alert("Video je blokiran!");
+						}
+					}
+				}
+				
+
+				
+		});
+		});
+	}
+	
+	
+	function nistePrijavljeni() {
+	    alert("Morate biti prijavljeni!");
+	}	
 		$.get('ChannelServlet', function(data) {
 			console.log('channel odgovor');
 			console.log(data);
 			if (data.status == 'unauthenticated') {
 				$(".channeloptions").hide();
 				$("#logout12").hide();
-				$.get('UcitavanjeServlet', function(response) {
-					for(var i=0; i<response.size; i++) {
-						var newDiv = $('<div></div>');
-						newDiv.addClass('VideoContainer');
-
-						var video = response.video[i];
-						
-						newDiv.append('<img width="250" height="150" src=' + video.slikaURL +'>'+'</img>'+'<br>'+'<p>'+video.opis+'</p>'+'<h5>'+video.vlasnik+'</h5>'+'</br>'+'<h5>'+video.brojPregleda+' prikaza   *'+'</h5>'+'<h5>'+' '+video.datumKreiranja+'</h5>');
-
-						newDiv.data('video', video.videoURL);
-						newDiv.data('slika', video.slikaURL);
-						newDiv.data('opis', video.opis);
-						newDiv.data('vidljivost', video.vidljivost);
-						newDiv.data('dozvoljeniKom', video.dozvoljeniKomentari);
-						newDiv.data('vidljivostRejtinga', video.vidljivostRejtinga);
-						newDiv.data('blokiran', video.blokiran);
-						newDiv.data('brojPregleda', video.brojPregleda+1);
-						newDiv.data('datum', video.datumKreiranja);
-						newDiv.data('vlasnik', video.vlasnik);
-						newDiv.data('id', video.id);
-
-						$('.sadrzaj').append(newDiv);
-					}
-					$(document).on('click', '.VideoContainer', function(e) {
-						var video = $(this).data('video');
-						var slika = $(this).data('slika');
-						var opis = $(this).data('opis');
-						var vidljivost = $(this).data('vidljivost');
-						var dozKom = $(this).data('dozvoljeniKom');
-						var vidRejt = $(this).data('vidljivostRejtinga');
-						var blokiran = $(this).data('blokiran');
-						var brPregleda = $(this).data('brojPregleda');
-						var datum = $(this).data('datum');
-						var vlasnik = $(this).data('vlasnik');
-						var id = $(this).data('id');
-
-						$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
-							
-							window.location.replace('PrikazVidea.html');
-							
-						});
+				$("#channel12").hide();
+				$("#admin").hide();
+				
+				$('#upload').on('click', function(event) {
+					nistePrijavljeni();
 				});
-			});
+				
+				// na svaki od ovih događaja se osvežava lista proizvoda
+				nameFilterInput.on('keyup', function(event) {
+					$('.VideoContainer').remove();
+					getVideos(sort);
+					
+					event.preventDefault();
+					return false;
+				});
+				
+				lowPreglediFilterInput.on('keyup', function(event) {
+					$('.VideoContainer').remove();
+					getVideos(sort);
+					
+					event.preventDefault();
+					return false;
+				});
+				
+				highPreglediFilterInput.on('keyup', function(event) {
+					$('.VideoContainer').remove();
+					getVideos(sort);
+					
+					event.preventDefault();
+					return false;
+				});
 			}
 			if (data.status == 'success') 
 			{
-				$(".channeloptions h2").text(data.user.korisnickoIme);
-				$(".channeloptions p").text(data.user.opis);
+				if(data.user.uloga!=="Administrator")
+				{
+					$("#admin").hide();
+				}
+				$(".channeloptions").hide();
+				if(data.user.blokiran!=1)
+				{
+					$('#upload').on('click', function(event) {
+						window.location.replace('Video.html');
+					});
+				}else
+				{
+					$('#upload').on('click', function(event) {
+						alert("Korisnik je blokiran");
+					});
+				}
+				
+				
+				$('#channel12').on('click', function(event) {
+					$.post('UserProfileServlet',{'vlasnik': 'lu'}, function(data) {
+						window.location.replace('UserProfile.html');
+						
+					});
+				});
+				
 				$("#login12").hide();
 				$("#registracija12").hide();
-				$.get('UcitavanjeServlet', function(response) {
-					for(var i=0; i<response.size; i++) {
-						var newDiv = $('<div></div>');
-						newDiv.addClass('VideoContainer');
-
-						var video = response.video[i];
-						
-						newDiv.append('<img width="250" height="150" src=' + video.slikaURL +'>'+'</img>'+'<br>'+'<p>'+video.opis+'</p>'+'<h5>'+video.vlasnik+'</h5>'+'</br>'+'<h5>'+video.brojPregleda+' prikaza   *'+'</h5>'+'<h5>'+' '+video.datumKreiranja+'</h5>');
-
-						newDiv.data('video', video.videoURL);
-						newDiv.data('slika', video.slikaURL);
-						newDiv.data('opis', video.opis);
-						newDiv.data('vidljivost', video.vidljivost);
-						newDiv.data('dozvoljeniKom', video.dozvoljeniKomentari);
-						newDiv.data('vidljivostRejtinga', video.vidljivostRejtinga);
-						newDiv.data('blokiran', video.blokiran);
-						newDiv.data('brojPregleda', video.brojPregleda);
-						newDiv.data('datum', video.datumKreiranja);
-						newDiv.data('vlasnik', video.vlasnik);
-						newDiv.data('id', video.id);
-
-						$('.sadrzaj').append(newDiv);
-					}
-					$(document).on('click', '.VideoContainer', function(e) {
-						var video = $(this).data('video');
-						var slika = $(this).data('slika');
-						var opis = $(this).data('opis');
-						var vidljivost = $(this).data('vidljivost');
-						var dozKom = $(this).data('dozvoljeniKom');
-						var vidRejt = $(this).data('vidljivostRejtinga');
-						var blokiran = $(this).data('blokiran');
-						var brPregleda = $(this).data('brojPregleda');
-						var datum = $(this).data('datum');
-						var vlasnik = $(this).data('vlasnik');
-						var id = $(this).data('id');
-
-						$.post('KlikServlet',{'video': video,'slika': slika,'opis': opis,'vidljivost': vidljivost,'dozKom': dozKom,'vidRejt': vidRejt,'blokiran': blokiran,'brPregleda': brPregleda,'datum': datum,'vlasnik': vlasnik,'id': id}, function(data) {
-							
-							window.location.replace('PrikazVidea.html');
-							
-						});
+				// na svaki od ovih događaja se osvežava lista proizvoda
+				nameFilterInput.on('keyup', function(event) {
+					$('.VideoContainer').remove();
+					getVideos(sort);
+					
+					event.preventDefault();
+					return false;
 				});
-			});
+				
+				lowPreglediFilterInput.on('keyup', function(event) {
+					$('.VideoContainer').remove();
+					getVideos(sort);
+					
+					event.preventDefault();
+					return false;
+				});
+				
+				highPreglediFilterInput.on('keyup', function(event) {
+					$('.VideoContainer').remove();
+					getVideos(sort);
+					
+					event.preventDefault();
+					return false;
+				});
 			}
 			console.log('poslat zahtev');
+		});
+		getVideos();
+		$('#admin').on('click', function(event) {
+			window.location.replace('Admin.html');
 		});
 	});
 </script>
 </head>
 <body>
-
 	<div class="menu_bg"></div> 
     			<div id="menu">
             		<ul>
             			<li><div id="slika">
-            				<img src="images/logo.jpg">
+            				<img src="images/logo.jpg" id="logo">
             			</div></li>
             			<li><div id="pretraga">
             				<input type="text" name="search_box" id="search_box" value="" />
 	                		<input type="submit" name="search_button" id="search_button" value="" />
+	                		<input id="more" type="image" src="images/more.jpg"/>
             			</div></li>
             			<li><div id="uploaddiv">
             				<input id="upload" type="image" src="images/upload.jpg">
@@ -136,23 +341,23 @@ $(document).ready(function() {
             			<ul>
             				<li><a id="login12" href="Login.html">LOGIN</a></li>
             				<li><a id="logout12" href="LogoutServlet">LOGOUT</a></li>
-            				<li><a id="channel12" href="Channel.html">CHANNELS</a></li>
+            				<li><a id="channel12" >PROFILE</a></li>
             				<li><a id="registracija12" href="Registracija.html">SIGN UP</a></li>
+            				<li><a id="admin">USER SETTINGS</a></li>
            				</ul>
         			</ul>
 	            </div>
 	           </div>
 	        <div class="channeloptions">
-	        	<h2></h2>
+	        	<h2>Napredna pretraga:</h2>
 	        	<center>
-	        	<img src="images/channelP.jpg" height="140px" width="140px">
-	        	</center><br>
-	        	<p>Informacije o kanalu...</p><br><br>
-	        	<center>
-	        	<input id="upload" type="image" src="images/upload.jpg" height="30px" width="30px">
+	        	<p>Pretraga po broju pregleda:</p>
+	        		Od:<input type="text" name="search_box" id="searchPreglediOd" value="" /></br>
+	        		Do:<input type="text" name="search_box" id="searchPreglediDo" value=""  />
 	        	</center>
+	        	<h2>Sortiranje:</h2>
 	        	<center>
-	        	Upload video
+	        	<select id="selectSort"><option value="Sortiraj po imenu">Sortiraj po imenu</option><option value="Sortiraj po datumu">Sortiraj po datumu</option></select><input type="submit" value="Sortiraj" id="sortiraj">
 	        	</center>
 	        </div>
 	        <div class='divP'></div>

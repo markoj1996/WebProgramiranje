@@ -8,13 +8,68 @@
 <script> 
 $(document).ready(function() {
 	
+	$('#logo').on('click', function(event) {
+		window.location.replace('PocetnaStrana.html');
+	});
+	
+	var nameFilterInput = $('#search_box');
+	
 	$.get('KlikServlet', function(data) {
-		console.log('prikaz odgovor');
 		if (data.status == 'success') 
 		{
 			if (data.user == 'unauthenticated') {
 				$(".channeloptions").hide();
 				$("#logout12").hide();
+				$("#channel12").hide();
+				$("#admin").hide();
+				
+				$('#upload').on('click', function(event) {
+					nistePrijavljeni();
+				});
+				
+				$("#search_button").on('click',function(event){
+					var nameFilter = nameFilterInput.val();
+
+					var params = {
+							'nameFilter': nameFilter,
+						};
+					$.post('SearchServlet',params ,function(response) {
+						
+					});
+					window.location.replace('PocetnaStrana.html');
+				});
+				
+				if(data.dozKom==1)
+				{
+					$.get('CommentServlet', function(response) {
+						for(var i=0; i<response.size; i++) {
+							var newDiv = $('<div></div>');
+							newDiv.append('<img id="imgUser" src="images/user.png"/>');
+							newDiv.addClass('CommentBr');
+							
+							var komentar = response.com[i];
+							var vlasnik = response.com[i].vlasnik.korisnickoIme;
+							
+							newDiv.data('vlasnik', vlasnik);
+							
+							newDiv.append('<h1 id="vlasnik">'+komentar.vlasnik.korisnickoIme+" * "+komentar.datumKreiranja+'</h1>');
+							newDiv.append('<h3>'+komentar.sadrzaj+'</h3>');
+							
+							$('.CommentContainer').append(newDiv);
+						}
+						
+						$(document).on('click', '.CommentBr', function(e) {
+							var vlasnik = $(this).data('vlasnik');
+							
+								$.post('UserProfileServlet',{'vlasnik': vlasnik}, function(data) {
+								window.location.replace('UserProfile.html');
+								
+							});
+							
+						});
+					});
+				}
+				
 				var newDiv = $('<div></div>');
 				newDiv.addClass('PrikazVidea');
 			
@@ -22,8 +77,16 @@ $(document).ready(function() {
 				newDiv2.addClass('OpisVidea');
 			
 				newDiv.append('<iframe width="700" height="450" src='+data.video.videoURL+' frameborder="0" allowfullscreen ></iframe>');
-				newDiv2.append('<h1>'+data.video.opis+'</h1>'+'<h4>'+data.video.vlasnik+'</h4>'+'<h3>'+data.video.brojPregleda+' Prikaza'+'</h3>')
+				newDiv2.append('<h1>'+data.video.opis+'</h1>'+'<h4 id="vlasnik">'+data.video.vlasnik+'</h4>'+'<h3>'+data.video.brojPregleda+' Prikaza'+'</h3>')
 			
+				$(document).on('click', '#vlasnik', function(e) {
+								$.post('UserProfileServlet',{'vlasnik': data.video.vlasnik}, function(data) {
+								window.location.replace('UserProfile.html');
+								
+							});
+							
+						});
+				
 				var newDivLike = $('<div></div>');
 				newDivLike.addClass('LikeDiv');
 				
@@ -31,21 +94,178 @@ $(document).ready(function() {
 				newDivDisLike.addClass('LikeDiv');
 			
 				var brojDisLike=10;
-				newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="return DisLike(this)"/><p>'+data.brojDislike+'</p>');
-				newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="return Like(this)"/><p id="pLike">'+data.brojLike+'</p>');
-			
+				if(data.video.vidljivostRejtinga==1)
+				{
+					newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="nistePrijavljeni()"/><p>'+data.brojDislike+'</p>');
+					newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="nistePrijavljeni()"/><p id="pLike">'+data.brojLike+'</p>');
+				}else{
+
+					newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="blokiranRejting()"/>');
+					newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="blokiranRejting()"/>');
+				}
+				var newDivSub = $('<div></div>');
+				newDivSub.addClass('SubDiv');
+				newDivSub.append('<img id="imgSub" src="images/subscribe.jpg" onClick="nistePrijavljeni()"/>');
+				
 				newDiv2.append(newDivLike);
 				newDiv2.append(newDivDisLike);
-				$('.sadrzaj').append(newDiv);
-				$('.sadrzaj').append(newDiv2);
+				newDiv2.append(newDivSub);
+				$('.sadrzajP').append(newDiv);
+				$('.sadrzajP').append(newDiv2);
 				
+				var newDiv4 = $('<div></div>');
+				newDiv4.addClass('AddComment');
+				newDiv4.append('<img id="imgUser" src="images/user.png"/>');
+				newDiv4.append('<input type="text" id="commentInput"/>');
+				newDiv4.append('<input type="submit" value="Comment" id="addComment"></br></br>');
+				newDiv4.append('<select id="selectSort"><option value="Sortiraj po imenu">Sortiraj po sadrzaju</option><option value="Sortiraj po datumu">Sortiraj po datumu</option></select><input type="submit" value="Sortiraj" id="sortiraj">');
 				
+				$('.sadrzajP').append(newDiv4);
+				
+				$('#sortiraj').on('click', function(event) {
+					var sort = $('#selectSort option:selected').text();
+					$('.CommentBr').remove();
+					if(data.dozKom==1)
+					{
+						$.get('CommentServlet', {'sort':sort}, function(response) {
+							for(var i=0; i<response.size; i++) {
+								var newDiv = $('<div></div>');
+								newDiv.append('<img id="imgUser" src="images/user.png"/>');
+								newDiv.addClass('CommentBr');
+								
+								var komentar = response.com[i];
+								
+								newDiv.data('vlasnik', komentar.vlasnik.korisnickoIme);
+								
+								newDiv.append('<h1 id="vlasnik">'+komentar.vlasnik.korisnickoIme+" * "+komentar.datumKreiranja+'</h1>');
+								newDiv.append('<h3>'+komentar.sadrzaj+'</h3>');
+								
+								$('.CommentContainer').append(newDiv);
+							}
+							
+							$(document).on('click', '.CommentBr', function(e) {
+								var vlasnik = $(this).data('vlasnik');
+								
+									$.post('UserProfileServlet',{'vlasnik': vlasnik}, function(data) {
+									window.location.replace('UserProfile.html');
+									
+								});
+								
+							});
+						});
+					}
+					
+				});		
 			}
+			$('#addComment').on('click',function(event){
+				nistePrijavljeni();
+			});
 			if (data.user != 'unauthenticated') {
+				
+				$("#search_button").on('click',function(event){
+					var nameFilter = nameFilterInput.val();
+
+					var params = {
+							'nameFilter': nameFilter,
+						};
+					$.post('SearchServlet',params ,function(response) {
+						
+					});
+					window.location.replace('PocetnaStrana.html');
+				});
+				
+				if(data.user.uloga!="Administrator")
+				{
+					$("#admin").hide();
+				}
+				
+				if(data.user.blokiran!=1)
+				{
+					
+				}
+				
+				$('#upload').on('click', function(event) {
+					if(data.user.blokiran!=1)
+					{
+						window.location.replace('Video.html');
+					}
+					else{
+						alert("Korisnik je blokiran")
+					}
+				});
+				
+				if(data.user.uloga==="Administrator")
+				{
+					$.get('CommentServlet', function(response) {
+						for(var i=0; i<response.size; i++) {
+							var newDiv = $('<div></div>');
+							newDiv.append('<img id="imgUser" src="images/user.png"/>');
+							newDiv.addClass('CommentBr');
+							
+							var komentar = response.com[i];
+							
+							newDiv.data('vlasnik', komentar.vlasnik);
+							
+							newDiv.append('<h1 id="vlasnik">'+komentar.vlasnik.korisnickoIme+" * "+komentar.datumKreiranja+'</h1>');
+							newDiv.append('<h3>'+komentar.sadrzaj+'</h3>');
+							
+							$('.CommentContainer').append(newDiv);
+						}
+						
+						$(document).on('click', '.CommentBr', function(e) {
+							var vlasnik = $(this).data('vlasnik');
+							
+								$.post('UserProfileServlet',{'vlasnik': vlasnik}, function(data) {
+								window.location.replace('UserProfile.html');
+								
+							});
+							
+						});
+						
+					});
+				}else
+				{
+					if(data.dozKom==1)
+					{
+						$.get('CommentServlet', function(response) {
+							for(var i=0; i<response.size; i++) {
+								var newDiv = $('<div></div>');
+								newDiv.append('<img id="imgUser" src="images/user.png"/>');
+								newDiv.addClass('CommentBr');
+								
+								var komentar = response.com[i];
+								
+								newDiv.data('vlasnik', komentar.vlasnik);
+								
+								newDiv.append('<h1 id="vlasnik">'+komentar.vlasnik.korisnickoIme+'</h1>');
+								newDiv.append('<h3>'+komentar.sadrzaj+'</h3>');
+								
+								$('.CommentContainer').append(newDiv);
+							}
+							
+							$(document).on('click', '.CommentBr', function(e) {
+								var vlasnik = $(this).data('vlasnik');
+								
+									$.post('UserProfileServlet',{'vlasnik': vlasnik}, function(data) {
+									window.location.replace('UserProfile.html');
+									
+								});
+								
+							});
+							
+						});
+					}
+				}
+			
+				
+				
 				$(".channeloptions h2").text(data.user.korisnickoIme);
 				$(".channeloptions p").text(data.user.opis);
 				$("#login12").hide();
 				$("#registracija12").hide();
+				
+				var liked = data.liked;
+				
 				var newDiv = $('<div></div>');
 				newDiv.addClass('PrikazVidea');
 			
@@ -53,7 +273,34 @@ $(document).ready(function() {
 				newDiv2.addClass('OpisVidea');
 			
 				newDiv.append('<iframe width="700" height="450" src='+data.video.videoURL+' frameborder="0" allowfullscreen ></iframe>');
-				newDiv2.append('<h1>'+data.video.opis+'</h1>'+'<h4>'+data.video.vlasnik+'</h4>'+'<h3>'+data.video.brojPregleda+' Prikaza'+'</h3>')
+				if(data.user.korisnickoIme===data.video.vlasnik)
+				{
+					newDiv2.append('<img id="imgchange" src="images/pencil.png" onClick="return onUpdate()" height="30px"/>'+'<img id="imgdelete" src="images/delete.jpg" onClick="return onDeleteVideo()" height="30px"/>'+'<h1>'+data.video.opis+'</h1>'+'<h4 id="vlasnik">'+data.video.vlasnik+'</h4>'+'<h3>'+data.video.brojPregleda+' Prikaza'+'</h3>')
+
+				}else if(data.user.uloga==="Administrator")
+				{
+					if(data.video.blokiran!=1)
+					{
+						newDiv2.append('<img id="imgchange" src="images/pencil.png" onClick="return onUpdate()" height="30px"/>'+'<img id="imgblock" src="images/block.jpg" onClick="return onBlockVideo(this)" height="30px"/>'+'<img id="imgdelete" src="images/delete.jpg" onClick="return onDeleteVideo()" height="30px"/>'+'<h1>'+data.video.opis+'</h1>'+'<h4 id="vlasnik">'+data.video.vlasnik+'</h4>'+'<h3>'+data.video.brojPregleda+' Prikaza'+'</h3>')
+
+					}else
+					{
+						newDiv2.append('<img id="imgchange" src="images/pencil.png" onClick="return onUpdate()" height="30px"/>'+'<img id="imgblock" src="images/blocked.jpg" onClick="return onBlockVideo(this)" height="30px"/>'+'<img id="imgdelete" src="images/delete.jpg" onClick="return onDeleteVideo()" height="30px"/>'+'<h1>'+data.video.opis+'</h1>'+'<h4 id="vlasnik">'+data.video.vlasnik+'</h4>'+'<h3>'+data.video.brojPregleda+' Prikaza'+'</h3>')
+
+					}
+				}
+				else
+				{
+					newDiv2.append('<img id="imgchange" src="images/pencil.png" onClick="return onUpdateN()" height="30px"/>'+'<h1>'+data.video.opis+'</h1>'+'<h4 id="vlasnik">'+data.video.vlasnik+'</h4>'+'<h3>'+data.video.brojPregleda+' Prikaza'+'</h3>')
+				}
+				
+				$(document).on('click', '#vlasnik', function(e) {
+					$.post('UserProfileServlet',{'vlasnik': data.video.vlasnik}, function(data) {
+					window.location.replace('UserProfile.html');
+					
+				});
+				
+			});
 			
 				var newDivLike = $('<div></div>');
 				newDivLike.addClass('LikeDiv');
@@ -62,35 +309,217 @@ $(document).ready(function() {
 				newDivDisLike.addClass('LikeDiv');
 			
 				var brojDisLike=10;
-				newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="return DisLike(this)"/><p id="pDislike">'+data.brojDislike+'</p>');
-				newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="return Like(this)"/><p id="pLike">'+data.brojLike+'</p>');
-			
+				
+				if(data.video.vidljivostRejtinga==1)
+				{
+					if(data.video.vlasnik!==data.user.korisnickoIme)
+					{
+						if(liked=="disliked")
+						{
+							newDivLike.append('<img id="imgDisLike" src="images/disliked.jpg" onClick="return DisLike(this)"/><p id="pDislike">'+data.brojDislike+'</p>');
+							newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="return Like(this)"/><p id="pLike">'+data.brojLike+'</p>');
+						}
+						else if(liked=="liked"){
+							newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="return DisLike(this)"/><p id="pDislike">'+data.brojDislike+'</p>');
+							newDivDisLike.append('<img id="imgLike" src="images/liked.jpg" onClick="return Like(this)"/><p id="pLike">'+data.brojLike+'</p>');
+							
+							
+						}
+						else{
+							newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="return DisLike(this)"/><p id="pDislike">'+data.brojDislike+'</p>');
+							newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="return Like(this)"/><p id="pLike">'+data.brojLike+'</p>');
+						}
+					
+					}else
+					{
+						newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="nistePrijavljeni()"/><p id="pDislike">'+data.brojDislike+'</p>');
+						newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="nistePrijavljeni()"/><p id="pLike">'+data.brojLike+'</p>');
+					}
+				}else
+				{
+				newDivLike.append('<img id="imgDisLike" src="images/dislike.jpg" onClick="blokiranRejting()"/>');
+				newDivDisLike.append('<img id="imgLike" src="images/like.jpg" onClick="blokiranRejting()"/>');
+				}
+					
+				var newDivSub = $('<div></div>');
+				newDivSub.addClass('SubDiv');
+				
+				
+				if(data.video.vlasnik===data.user.korisnickoIme)
+				{
+					newDivSub.append('<img id="imgSub" src="images/subscribe.jpg" onClick="NoSub()"/>');
+					
+				}else if(data.subscribed=="yes")
+				{
+					newDivSub.append('<img id="imgSub" src="images/subscribed.jpg" onClick="Sub(this)"/>');
+				}else
+				{
+					newDivSub.append('<img id="imgSub" src="images/subscribe.jpg" onClick="Sub(this)"/>');
+				}
+				
+				
 				newDiv2.append(newDivLike);
 				newDiv2.append(newDivDisLike);
-				$('.sadrzaj').append(newDiv);
-				$('.sadrzaj').append(newDiv2);
+				newDiv2.append(newDivSub);
+				$('.sadrzajP').append(newDiv);
+				$('.sadrzajP').append(newDiv2);
 				
+				var newDiv3 = $('<div></div>');
+				newDiv3.addClass('AddComment');
+				newDiv3.append('<img id="imgUser" src="images/user.png"/>');
+				newDiv3.append('<input type="text" id="commentInput"/>');
+				newDiv3.append('<input type="submit" value="Comment" id="addCommentP"></br></br>');
+				newDiv3.append('<select id="selectSort"><option value="Sortiraj po imenu">Sortiraj po imenu</option><option value="Sortiraj po datumu">Sortiraj po datumu</option></select><input type="submit" value="Sortiraj" id="sortiraj">');
+				$('.sadrzajP').append(newDiv3);
+				
+				$('#sortiraj').on('click', function(event) {
+					var sort = $('#selectSort option:selected').text();
+					$('.CommentBr').remove();
+					if(data.dozKom==1)
+					{
+						$.get('CommentServlet', {'sort':sort}, function(response) {
+							for(var i=0; i<response.size; i++) {
+								var newDiv = $('<div></div>');
+								newDiv.append('<img id="imgUser" src="images/user.png"/>');
+								newDiv.addClass('CommentBr');
+								
+								var komentar = response.com[i];
+								
+								newDiv.data('vlasnik', komentar.vlasnik.korisnickoIme);
+								
+								newDiv.append('<h1 id="vlasnik">'+komentar.vlasnik.korisnickoIme+'</h1>');
+								newDiv.append('<h3>'+komentar.sadrzaj+'</h3>');
+								
+								$('.CommentContainer').append(newDiv);
+							}
+							
+							$(document).on('click', '.CommentBr', function(e) {
+								var vlasnik = $(this).data('vlasnik');
+								
+									$.post('UserProfileServlet',{'vlasnik': vlasnik}, function(data) {
+									window.location.replace('UserProfile.html');
+									
+								});
+								
+							});
+						});
+					}
+					
+				});
 			}
 			
+				$('#addCommentP').on('click',function(event){
+					if(data.dozKom==1)
+					{
+						var commentInput = $('#commentInput');
+						var comment = commentInput.val();
+						$.post('CommentServlet', {'comment': comment,'video':data.video.id}, function(data) { // u posebnoj programskoj niti se šalje (asinhroni) zahtev
+							// tek kada stigne odgovor izvršiće se ova anonimna funkcija
+							console.log('stigao odgovor');
+							console.log(data);
+							window.location.reload(true);
+						});
+					}else
+					{
+						alert("Komentari nisu dozvoljeni!");
+					}
+				});
 		}
 	});	
 	
 });
+function nistePrijavljeni() {
+    alert("Morate biti prijavljeni!");
+}
+
+function blokiranRejting() {
+    alert("Rejting je blokiran!");
+}
+
+function onDeleteVideo() {
+	if(confirm("Da li ste sigurni da zelite da obrisete video?")) {
+		$.post('DeleteServlet', function(data) { 
+			if(data.message==="obrisan")
+			{
+				window.location.replace('PocetnaStrana.html');
+			}
+		});
+	} else {
+	    txt = "You pressed Cancel!";
+	}
+}
+
+function onBlockVideo(e) {
+	if (e.getAttribute('src') == 'images/blocked.jpg') {
+		e.setAttribute('src', 'images/block.jpg')
+		$.post('BlockServlet', {'status':"delete",'video':"video"}, function(data) { 
+			console.log('stigao odgovor');
+			console.log(data);
+		});
+	}
+	else {
+		e.setAttribute('src', 'images/blocked.jpg');
+		e.setAttribute('src', 'images/block.jpg');
+		$.post('BlockServlet', {'status':"add",'video':"video"}, function(data) {
+			console.log('stigao odgovor');
+			console.log(data);
+		});
+	}
+}
+
+function NoSub() {
+    alert("Ne mozete se subsribe na svoj kanal!");
+}
+
+function nistePrijavljeniP(comment) {
+    alert(comment);
+}
+
+function onUpdateN() {
+	 alert("Niste vlasnik video snimka!");
+}
+
+function onUpdate() {
+	window.location.replace('IzmenaVidea.html');
+}
 
 function DisLike(e) {
 	
 	if (e.getAttribute('src') == 'images/disliked.jpg') {
 		e.setAttribute('src', 'images/dislike.jpg')
+		var like = "ponistiLike";
+		
+		$.post('LikeServlet',{'like':like}, function(data) {
+			
+			window.location.replace('PrikazVidea.html');
+			
+		});
 		
 	}
 	else {
 		e.setAttribute('src', 'images/disliked.jpg');
-		
 		var upvotes = document.getElementById("imgLike");
 		
 		if(upvotes.getAttribute('src') == 'images/liked.jpg') {
 			upvotes.setAttribute('src', 'images/like.jpg');
-		}
+			
+			var like = "dislikeL";
+			
+			$.post('LikeServlet',{'like':like}, function(data) {
+				
+				window.location.replace('PrikazVidea.html');
+				
+			});
+			
+		}else{
+			var like = "dislajkuj";
+			
+			$.post('LikeServlet',{'like':like}, function(data) {
+				
+				window.location.replace('PrikazVidea.html');
+				
+			});
+		}	
 		
 	}
 	
@@ -102,17 +531,61 @@ function Like(e) {
 	
 	if (e.getAttribute('src') == 'images/liked.jpg') {
 		e.setAttribute('src', 'images/like.jpg')
+
+		var like = "ponistiLike";
 		
-		
+		$.post('LikeServlet',{'like':like}, function(data) {
+			
+			window.location.replace('PrikazVidea.html');
+			
+		});
 	}
 	else {
 		e.setAttribute('src', 'images/liked.jpg');
-		
 		var downvotes = document.getElementById("imgDisLike");
 		
 		if(downvotes.getAttribute('src') == 'images/disliked.jpg') {
 			downvotes.setAttribute('src', 'images/dislike.jpg');
-		}
+			
+			var like = "LikeD";
+			
+			$.post('LikeServlet',{'like':like}, function(data) {
+				
+				window.location.replace('PrikazVidea.html');
+				
+			});
+		}else{
+			var like = "lajkuj";
+			
+			$.post('LikeServlet',{'like':like}, function(data) {
+				
+				window.location.replace('PrikazVidea.html');
+				
+			});
+		}	
+	}
+	
+	
+	return false;
+}
+
+function Sub(e) {
+	
+	if (e.getAttribute('src') == 'images/subscribed.jpg') {
+		e.setAttribute('src', 'images/subscribe.jpg')
+		$.post('SubscribeServlet', {'status':"delete"}, function(data) { // u posebnoj programskoj niti se šalje (asinhroni) zahtev
+			// tek kada stigne odgovor izvršiće se ova anonimna funkcija
+			console.log('stigao odgovor');
+			console.log(data);
+		});
+	}
+	else {
+		e.setAttribute('src', 'images/subscribed.jpg');
+		$.post('SubscribeServlet', {'status':"add"}, function(data) { // u posebnoj programskoj niti se šalje (asinhroni) zahtev
+			// tek kada stigne odgovor izvršiće se ova anonimna funkcija
+			console.log('stigao odgovor');
+			console.log(data);
+		});
 	}
 	
 	
@@ -124,10 +597,9 @@ function Like(e) {
 <body>
 	<div class="menu_bg"></div> 
     			<div id="menu">
-            		<div id="menu">
             		<ul>
             			<li><div id="slika">
-            				<img src="images/logo.jpg">
+            				<img src="images/logo.jpg" id="logo">
             			</div></li>
             			<li><div id="pretraga">
             				<input type="text" name="search_box" id="search_box" value="" />
@@ -140,26 +612,18 @@ function Like(e) {
             			<ul>
             				<li><a id="login12" href="Login.html">LOGIN</a></li>
             				<li><a id="logout12" href="LogoutServlet">LOGOUT</a></li>
-            				<li><a id="channel12" href="Channel.html">CHANNELS</a></li>
+            				<li><a id="channel12">PROFILE</a></li>
             				<li><a id="registracija12" href="Registracija.html">SIGN UP</a></li>
+            				<li><a id="admin">USER SETTINGS</a></li>
            				</ul>
         			</ul>
 	            </div>
 	            </div>
 	           </div>
-	        <div class="channeloptions">
-	        	<h2></h2>
-	        	<center>
-	        	<img src="images/channelP.jpg" height="140px" width="140px">
-	        	</center><br>
-	        	<p>Informacije o kanalu...</p><br><br>
-	        	<center>
-	        	<input id="upload" type="image" src="images/upload.jpg" height="30px" width="30px">
-	        	</center>
-	        	<center>
-	        	Upload video
-	        	</center>
-	        </div>
-	        <div class='sadrzaj'></div>
+	        <div class='sadrzajP'></div>
+	        <div class='CommentContainer'></div>
+	        <footer>
+		    	Copyright &copy; 2017. Jankovic Marko
+		    </footer>
 </body>
 </html>

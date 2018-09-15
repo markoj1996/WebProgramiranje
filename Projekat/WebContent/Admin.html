@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Upravljanje korisnicima</title>
+<link rel="stylesheet" type="text/css" href="still.css">
+<script src="jquery-3.2.1.js"></script>
+<script> 
+$(document).ready(function() {
+	var nameFilterInput = $('#search_box');
+	function getUsers() {
+
+		var nameFilter = nameFilterInput.val();
+
+		var params = {
+			'nameFilter': nameFilter,
+		};
+		$.get('AdminServlet', params, function(response) {
+			
+			for(var i=0; i<response.size; i++) {
+					var newDiv = $('<div></div>');
+					newDiv.addClass('UserContainer');
+
+					var video = response.users[i];
+					
+					newDiv.append('<img id="profilePhoto" src="images/channelP.jpg">'+'</img>');
+					newDiv.append('</br></br></br></br></br><p>'+video.korisnickoIme+'</p>');
+					newDiv.append('<h5>'+video.ime+" "+video.prezime+" * "+video.datumRegistracije+'</h5>');
+
+					newDiv.data('user', video.korisnickoIme);
+
+					$('.sadrzaj').append(newDiv);
+			}
+			$(document).on('click', '.UserContainer', function(e) {
+				var user = $(this).data('user');
+				
+				$.post('UserProfileServlet',{'vlasnik': user}, function(data) {
+					window.location.replace('UserProfile.html');
+					
+				});
+			});
+		});
+	}
+	
+	$("#login12").hide();
+	$("#registracija12").hide();
+	
+	$('#channel12').on('click', function(event) {
+		$.post('UserProfileServlet',{'vlasnik': 'lu'}, function(data) {
+			window.location.replace('UserProfile.html');
+			
+		});
+	});
+	
+	$('#admin').on('click', function(event) {
+		window.location.replace('Admin.html');
+	});
+	
+	nameFilterInput.on('keyup', function(event) {
+		$('.UserContainer').remove();
+		getUsers();
+		
+		event.preventDefault();
+		return false;
+	});
+		getUsers();
+});
+</script>
+</head>
+<body>
+<div class="menu_bg"></div> 
+    			<div id="menu">
+            		<ul>
+            			<li><div id="slika">
+            				<img src="images/logo.jpg" id="logo">
+            			</div></li>
+            			<li><div id="pretraga">
+            				<input type="text" name="search_box" id="search_box" value="" />
+	                		<input type="submit" name="search_button" id="search_button" value="" />
+	                		<input id="more" type="image" src="images/more.jpg"/>
+            			</div></li>
+            			<li><div id="uploaddiv">
+            				<input id="upload" type="image" src="images/upload.jpg">
+            			</div></li>
+            			<li><div id="dugmici">
+            			<ul>
+            				<li><a id="login12" href="Login.html">LOGIN</a></li>
+            				<li><a id="logout12" href="LogoutServlet">LOGOUT</a></li>
+            				<li><a id="channel12" >PROFILE</a></li>
+            				<li><a id="registracija12" href="Registracija.html">SIGN UP</a></li>
+            				<li><a id="admin">USER SETTINGS</a></li>
+           				</ul>
+        			</ul>
+	            </div>
+	           </div>
+	           <div class='divP'></div>
+	        <div class='sadrzaj'></div>
+	        <footer>
+		    	Copyright &copy; 2017. Jankovic Marko
+		    </footer>
+</body>
+</html>

@@ -19,6 +19,7 @@ public class Video {
 	private int brojPregleda;
 	private String datumKreiranja;
 	private String vlasnik;
+	private Korisnik vlasnikV;
 	
 	public Video(){}
 	
@@ -44,7 +45,7 @@ public class Video {
 	}
 	public Video(int iD, String videoURL, String slikaURL, String opis, String vidljivost,
 			int dozvoljeniKomentari, int vidljivostRejtinga, int blokiran, int brojPregleda,
-			String datumKreiranja, String vlasnik) {
+			String datumKreiranja, String vlasnik,Korisnik vlasnikV) {
 		super();
 		ID = iD;
 		this.videoURL = videoURL;
@@ -57,6 +58,7 @@ public class Video {
 		this.brojPregleda = brojPregleda;
 		this.datumKreiranja = datumKreiranja;
 		this.vlasnik = vlasnik;
+		this.vlasnikV = vlasnikV;
 	}
 
 	public int getID() {
@@ -145,6 +147,14 @@ public class Video {
 
 	public void setVlasnik(String vlasnik) {
 		this.vlasnik = vlasnik;
+	}
+
+	public Korisnik getVlasnikV() {
+		return vlasnikV;
+	}
+
+	public void setVlasnikV(Korisnik vlasnikV) {
+		this.vlasnikV = vlasnikV;
 	}
 	
 	
