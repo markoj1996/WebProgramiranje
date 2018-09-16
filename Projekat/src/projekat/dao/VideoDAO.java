@@ -106,10 +106,88 @@ public class VideoDAO {
 				try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
 				try {rset.close();} catch (SQLException ex1) {ex1.printStackTrace();}
 			}
-		}else 
+		}else if(sort.equals("Sortiraj po datumu"))
 		{
 			try {
 				String query = "select id,video,slicica,opis,vidljivost,dozvoljenikomentari,vidljivostrejtinga,blokiran,brojpregleda,datumkreiranja,vlasnik from Video where (opis like ? or vlasnik like ?) and brojpregleda >= ? and brojpregleda <= ? order by datumkreiranja";
+
+				pstmt = conn.prepareStatement(query);
+				int index = 1;
+				pstmt.setString(index++, "%" + nameFilter + "%");
+				pstmt.setString(index++, "%" + nameFilter + "%");
+				pstmt.setInt(index++, lowFilter);
+				pstmt.setInt(index++, highFilter);
+				System.out.println(pstmt);
+
+				rset = pstmt.executeQuery();
+				while (rset.next()) {
+					index = 1;
+					int id = rset.getInt(index++);
+					String videoV = rset.getString(index++);
+					String slicica = rset.getString(index++);
+					String opis = rset.getString(index++);
+					String vidljivost = rset.getString(index++);
+					int dozvoljeniKomentari = rset.getInt(index++);
+					int vidljivostRejtinga = rset.getInt(index++);
+					int blokiran = rset.getInt(index++);
+					int brojPregleda = rset.getInt(index++);
+					String datumKreiranja = rset.getString(index++);
+					String vlasnik = rset.getString(index++);
+
+					Korisnik vlasnikV= UserDAO.get(vlasnik);
+					Video video = new Video(id,videoV, slicica, opis, vidljivost, dozvoljeniKomentari, vidljivostRejtinga, blokiran, brojPregleda, datumKreiranja, vlasnik,vlasnikV);
+					videos.add(video);
+				}
+			} catch (SQLException ex) {
+				System.out.println("Greska u SQL upitu!");
+				ex.printStackTrace();
+			} finally {
+				try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+				try {rset.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+			}
+		}else if(sort.equals("Sortiraj po broju pregleda o"))
+		{
+			try {
+				String query = "select id,video,slicica,opis,vidljivost,dozvoljenikomentari,vidljivostrejtinga,blokiran,brojpregleda,datumkreiranja,vlasnik from Video where (opis like ? or vlasnik like ?) and brojpregleda >= ? and brojpregleda <= ? order by brojpregleda desc";
+
+				pstmt = conn.prepareStatement(query);
+				int index = 1;
+				pstmt.setString(index++, "%" + nameFilter + "%");
+				pstmt.setString(index++, "%" + nameFilter + "%");
+				pstmt.setInt(index++, lowFilter);
+				pstmt.setInt(index++, highFilter);
+				System.out.println(pstmt);
+
+				rset = pstmt.executeQuery();
+				while (rset.next()) {
+					index = 1;
+					int id = rset.getInt(index++);
+					String videoV = rset.getString(index++);
+					String slicica = rset.getString(index++);
+					String opis = rset.getString(index++);
+					String vidljivost = rset.getString(index++);
+					int dozvoljeniKomentari = rset.getInt(index++);
+					int vidljivostRejtinga = rset.getInt(index++);
+					int blokiran = rset.getInt(index++);
+					int brojPregleda = rset.getInt(index++);
+					String datumKreiranja = rset.getString(index++);
+					String vlasnik = rset.getString(index++);
+
+					Korisnik vlasnikV= UserDAO.get(vlasnik);
+					Video video = new Video(id,videoV, slicica, opis, vidljivost, dozvoljeniKomentari, vidljivostRejtinga, blokiran, brojPregleda, datumKreiranja, vlasnik,vlasnikV);
+					videos.add(video);
+				}
+			} catch (SQLException ex) {
+				System.out.println("Greska u SQL upitu!");
+				ex.printStackTrace();
+			} finally {
+				try {pstmt.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+				try {rset.close();} catch (SQLException ex1) {ex1.printStackTrace();}
+			}
+		}else 
+		{
+			try {
+				String query = "select id,video,slicica,opis,vidljivost,dozvoljenikomentari,vidljivostrejtinga,blokiran,brojpregleda,datumkreiranja,vlasnik from Video where (opis like ? or vlasnik like ?) and brojpregleda >= ? and brojpregleda <= ? order by brojpregleda";
 
 				pstmt = conn.prepareStatement(query);
 				int index = 1;
